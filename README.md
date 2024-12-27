@@ -10,7 +10,7 @@ The [dingo-sdk](https://github.com/dingodb/dingo-sdk) and [dingofs](https://gith
 
 ```sh
 sudo dnf install -y epel-release
-sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch
+sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch autoconf automake libtool
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
@@ -23,7 +23,7 @@ source /opt/rh/gcc-toolset-13/enable
 
 ```sh
 sudo apt update
-sudo apt install -y wget tar git make patch gcc g++ perl flex bison
+sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
