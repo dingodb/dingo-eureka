@@ -1,20 +1,10 @@
-# docker.io rockylinux/rockylinux:9.3
-# harbor harbor.zetyun.cn/dingofs/rockylinux:9.3
-FROM harbor.zetyun.cn/dingofs/rockylinux:9.3
+FROM rockylinux/rockylinux:8.9
 
 ENV TZ=Asia/Shanghai
 
 SHELL ["/bin/bash", "-c"]
 
-# Material: cmake-3.30.1-linux-x86_64.tar.gz musl-1.2.5.tar.gz protoc-25.1-linux-x86_64.zip go1.23.4.linux-amd64.tar.gz bazel-4.2.4-linux-x86_64 jemalloc-5.3.0.tar.bz2
-COPY ./pkg/* Mtmp/
-
-# Step 1: Update the repository configuration to use Aliyun mirrors
-RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-    -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.aliyun.com/rockylinux|g' \
-    -i.bak \
-    /etc/yum.repos.d/rocky-*.repo \
-    && dnf makecache
+COPY cmake-3.30.1-linux-x86_64.tar.gz musl-1.2.5.tar.gz protoc-25.1-linux-x86_64.zip go1.23.4.linux-amd64.tar.gz bazel-4.2.4-linux-x86_64 jemalloc-5.3.0.tar.bz2 /tmp/
 
 # Step 2: Install necessary packages and set up the environment
 RUN dnf update -y  \
@@ -39,11 +29,15 @@ RUN cd /tmp && cp bazel-4.2.4-linux-x86_64 /usr/bin/bazel && chmod a+x /usr/bin/
 
 RUN cd /tmp && tar -xjvf jemalloc-5.3.0.tar.bz2 && cd jemalloc-5.3.0 && ./configure && make && make install
 
+# Install build dependencies
+RUN dnf groupinstall -y "Development Tools"
+
 # Build and install libfiu
 RUN mkdir -p /tmp/build && \
     cd /tmp/build && \
-    git clone https://github.com/albertito/libfiu.git && \
-    cd libfiu && \
+    wget https://github.com/albertito/libfiu/archive/refs/tags/1.1.tar.gz && \
+    tar -xzf 1.1.tar.gz && \
+    cd libfiu-1.1 && \ 
     make && \
     make install && \
     ldconfig
