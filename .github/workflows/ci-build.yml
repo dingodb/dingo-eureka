@@ -73,7 +73,7 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         context: .
-        file: ./Dockerfile
+        file: ./docker/eureka/rocky9/Dockerfile
         push: true
         tags: ${{ steps.meta.outputs.tags }}
   
