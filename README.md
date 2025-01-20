@@ -78,13 +78,11 @@ make -j 32
 | jsoncpp           | master        |
 | zlib              | v1.3.1        |
 | protobuf          | v3.25.5       |
-| protobuf          | v3.25.5       |
 | grpc              | v1.62.2       |
 | snappy            | main          |
 | leveldb           | main          |
-| leveldb           | main          |
-| brpc              | 1.11.0        |
-| rocksdb           | v9.9.3        |
+| brpc              | 1.12.1        |
+| rocksdb           | v9.8.4        |
 | incbin            | main          |
 | libfiu            | master        |
 | c4c32c            | main          |

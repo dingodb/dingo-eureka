@@ -26,7 +26,34 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX "d.a")
+endif()
+
 include(ExternalProject)
+
+set(GFLAGS_INCLUDE_DIR
+    "${INSTALL_PATH}/include"
+    CACHE PATH "gflags include directory." FORCE)
+
+if(WIN32)
+  set(GFLAGS_LIBRARIES
+      "${INSTALL_PATH}/lib/gflags_static.lib"
+      CACHE FILEPATH "GFLAGS_LIBRARIES" FORCE)
+else(WIN32)
+  if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(GFLAGS_LIBRARIES
+        "${INSTALL_PATH}/lib/libgflags_debug.a"
+        CACHE FILEPATH "GFLAGS_LIBRARIES" FORCE)
+  else()
+    set(GFLAGS_LIBRARIES
+        "${INSTALL_PATH}/lib/libgflags.a"
+        CACHE FILEPATH "GFLAGS_LIBRARIES" FORCE)
+  endif()
+endif(WIN32)
+
+# print GFLAGS_LIBRARIES
+message("GFLAGS_LIBRARIES: ${GFLAGS_LIBRARIES}")
 
 ExternalProject_Add(gflags
    PREFIX gflags
@@ -41,6 +68,22 @@ ExternalProject_Add(gflags
        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
+
+set(GLOG_INCLUDE_DIR
+    "${INSTALL_PATH}/include"
+    CACHE PATH "glog include directory." FORCE)
+
+if(WIN32)
+  set(GLOG_LIBRARIES
+      "${INSTALL_PATH}/lib/glog.lib"
+      CACHE FILEPATH "glog library." FORCE)
+  set(GLOG_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4530")
+else(WIN32)
+  set(GLOG_LIBRARIES
+      "${INSTALL_PATH}/lib/libglog${CMAKE_STATIC_LIBRARY_SUFFIX}"
+      CACHE FILEPATH "glog library." FORCE)
+  set(GLOG_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+endif(WIN32)
 
 # version must less than 0.7.0, because brpc depends
 ExternalProject_Add(glog
@@ -135,6 +178,9 @@ ExternalProject_Add(jsoncpp
 set(ZLIB_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/zlib)
 set(ZLIB_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/zlib/build)
 
+# print CMAKE_CURRENT_BINARY_DIR
+message("CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+
 file(WRITE ${ZLIB_BINARY_DIR}/copy_repo.sh
      "mkdir -p ${ZLIB_BINARY_DIR} && cp -rf ${ZLIB_SOURCES_DIR}/* ${ZLIB_BINARY_DIR}/")
 
@@ -199,6 +245,26 @@ ExternalProject_Add(utf8_range
 
 # used by sdk/fs 
 # used by grpc 
+set(PROTOBUF_INSTALL_DIR ${INSTALL_PATH})
+set(PROTOBUF_INCLUDE_DIR
+    "${PROTOBUF_INSTALL_DIR}/include"
+    CACHE PATH "protobuf include directory." FORCE)
+set(PROTOBUF_LITE_LIBRARY
+    "${PROTOBUF_INSTALL_DIR}/lib/libprotobuf-lite${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    CACHE FILEPATH "protobuf lite library." FORCE)
+set(PROTOBUF_LIBRARY
+    "${PROTOBUF_INSTALL_DIR}/lib/libprotobuf${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    CACHE FILEPATH "protobuf library." FORCE)
+set(PROTOBUF_LIBRARIES
+    ${PROTOBUF_LIBRARY}
+    CACHE FILEPATH "protobuf library." FORCE)
+set(PROTOBUF_PROTOC_LIBRARY
+    "${PROTOBUF_INSTALL_DIR}/lib/libprotoc${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    CACHE FILEPATH "protoc library." FORCE)
+set(PROTOBUF_PROTOC_EXECUTABLE
+    "${PROTOBUF_INSTALL_DIR}/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}"
+    CACHE FILEPATH "protobuf executable." FORCE)
+
 ExternalProject_Add(protobuf
   PREFIX protobuf
   SOURCE_DIR "${PROTOBUF_SOURCES_DIR}"
@@ -339,6 +405,11 @@ ExternalProject_Add(brpc
       -DBUILD_BRPC_TOOLS=OFF
       -DWITH_DEBUG_SYMBOLS=OFF
       -DOPENSSL_USE_STATIC_LIBS=TRUE
+      -DGLOG_INCLUDE_PATH=${GLOG_INCLUDE_DIR}
+      -DGLOG_LIB=${GLOG_LIBRARIES}
+      -DGFLAGS_INCLUDE_PATH=${GFLAGS_INCLUDE_DIR}
+      -DGFLAGS_LIBRARY=${GFLAGS_LIBRARIES}
+      -DPROTOC_LIB=${PROTOBUF_LIBRARIES}
     CMAKE_CACHE_ARGS
       -DOPENSSL_ROOT_DIR:PATH=${INSTALL_PATH}
       -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
@@ -366,6 +437,10 @@ ExternalProject_Add(braft
         -DBRPC_WITH_GLOG=ON
         -Dgflags_DIR:STRING=${INSTALL_PATH}/lib/cmake/gflags
         -DWITH_DEBUG_SYMBOLS=OFF
+        -DGFLAGS_INCLUDE_PATH=${GFLAGS_INCLUDE_DIR}
+        -DGFLAGS_LIB=${GFLAGS_LIBRARIES}
+        -DGLOG_INCLUDE_PATH=${GLOG_INCLUDE_DIR}
+        -DGLOG_LIB=${GLOG_LIBRARIES}
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -606,12 +681,12 @@ ExternalProject_Add(aws-sdk-cpp
         -DAUTORUN_UNIT_TESTS=OFF
         -DBUILD_ONLY=s3
         -DBUILD_OPTEL=ON
-        -DBUILD_OPTEL_OTLP_BENCHMARKS=ON # if not turn on the opentelemetry cmake find will fail[
+        -DBUILD_OPTEL_OTLP_BENCHMARKS=ON # if not turn on the opentelemetry cmake find will fail
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-    DEPENDS curl zlib openssl opentelemetry-cpp
+    DEPENDS curl zlib openssl opentelemetry-cpp 
 )
 
 # used by fs
