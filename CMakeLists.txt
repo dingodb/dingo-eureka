@@ -482,7 +482,7 @@ ExternalProject_Add(liburing
     INSTALL_COMMAND $(MAKE) install
 )
 
-# used by fs
+# used by fs and db
 ExternalProject_Add(rocksdb
     PREFIX rocksdb
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/rocksdb"
@@ -501,6 +501,7 @@ ExternalProject_Add(rocksdb
         -DWITH_CORE_TOOLS=OFF
         -DWITH_TOOLS=OFF
         -DWITH_TRACE_TOOLS=OFF
+        -DPORTABLE=haswell
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DZLIB_ROOT:STRING=${INSTALL_PATH}

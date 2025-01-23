@@ -6,7 +6,7 @@ The [dingo-sdk](https://github.com/dingodb/dingo-sdk) and [dingofs](https://gith
 
 ## Dependencies
 
-### Rocky 8.9/9.3
+### Rocky 8.9/9.4
 
 ```sh
 sudo dnf install -y epel-release
@@ -39,7 +39,7 @@ In the source dir
 ```shell
 git submodule sync --recursive
 
-git submodule update --init --recursive
+git submodule update --init --recursive --progress
 ```
 
 ### Build and Install 
@@ -87,6 +87,7 @@ make -j 32
 | libfiu            | master        |
 | c4c32c            | main          |
 | memcache          | v1.x          |
+| openssl           | 3.4.0         |
 | spdlog            | v1.x          |
 | curl              | curl-8_9_1    |
 | opentelemetry-cpp | main          |
