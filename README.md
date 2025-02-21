@@ -72,7 +72,7 @@ make -j 32
 | gflags            | master        |
 | glog              | v0.6.0        |
 | googletest        | main          |
-| fmt               | master        |
+| fmt               | 11.1.3        |
 | nlohmann-json     | develop       |
 | rapidjson         | master        |
 | jsoncpp           | master        |
@@ -88,7 +88,7 @@ make -j 32
 | c4c32c            | main          |
 | memcache          | v1.x          |
 | openssl           | 3.4.0         |
-| spdlog            | v1.x          |
+| spdlog            | v1.15.1       |
 | curl              | curl-8_9_1    |
 | opentelemetry-cpp | main          |
 | aws-sdk-cpp       | 1.11.400      |
