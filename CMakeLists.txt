@@ -735,3 +735,43 @@ ExternalProject_Add(hdf5
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
     DEPENDS zlib
 )
+
+# libfuse
+string(TOLOWER "${CMAKE_BUILD_TYPE}" TMP_BUILD_TYPE)
+if (TMP_BUILD_TYPE STREQUAL "debug")
+    set(MESON_BUILD_TYPE "debug")
+elseif (TMP_BUILD_TYPE STREQUAL "release")
+    set(MESON_BUILD_TYPE "release")
+elseif (TMP_BUILD_TYPE STREQUAL "relwithdebinfo")
+    set(MESON_BUILD_TYPE "debugoptimized")
+elseif (TMP_BUILD_TYPE STREQUAL "minsizerel")
+    set(MESON_BUILD_TYPE "minsize")
+else()
+    set(MESON_BUILD_TYPE "plain")
+endif()
+message("meson buildtype is ${MESON_BUILD_TYPE}")
+
+set(LIBFUSE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libfuse)
+set(LIBFUSE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libfuse/build)
+
+ExternalProject_Add(
+    libfuse
+    SOURCE_DIR          ${LIBFUSE_SOURCES_DIR}
+    BINARY_DIR          ${LIBFUSE_BINARY_DIR}
+    CONFIGURE_COMMAND   meson setup
+                         ${LIBFUSE_SOURCES_DIR}
+                         ${LIBFUSE_BINARY_DIR}
+                         --prefix=${INSTALL_PATH}
+                         --buildtype=${MESON_BUILD_TYPE}
+                         --default-library=static
+                         --libdir=lib
+                         --includedir=include
+                         -Dexamples=false
+                         -Duseroot=false
+                         -Dudevrulesdir=${INSTALL_PATH}/include/fuse3/etc
+                         -Dinitscriptdir=${INSTALL_PATH}/include/fuse3/etc
+                         -Dsysconfdir=${INSTALL_PATH}/include/fuse3/etc
+    BUILD_COMMAND       meson compile -C ${LIBFUSE_BINARY_DIR}
+    INSTALL_COMMAND     meson install -C ${LIBFUSE_BINARY_DIR}
+    BUILD_ALWAYS        TRUE
+)

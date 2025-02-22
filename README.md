@@ -10,7 +10,7 @@ The [dingo-sdk](https://github.com/dingodb/dingo-sdk) and [dingofs](https://gith
 
 ```sh
 sudo dnf install -y epel-release
-sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch autoconf automake libtool
+sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch autoconf automake libtool python3-pip
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
@@ -23,12 +23,18 @@ source /opt/rh/gcc-toolset-13/enable
 
 ```sh
 sudo apt update
-sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool
+sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
 sudo cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ && sudo cp -rf  cmake-3.30.1-linux-x86_64/share/* /usr/local/share && rm -rf cmake-3.30.1-linux-x86_64
 ```
+install meson,ninja for libfuse compile
+sudo pip3 install -U meson
+wget https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+unzip ninja-linux.zip
+sudo cp ninja /usr/local/bin/
+sudo chmod +x /usr/local/bin/ninja
 
 ## How to build 
 
