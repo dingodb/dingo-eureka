@@ -94,3 +94,6 @@
 [submodule "libbacktrace"]
 	path = libbacktrace
 	url = https://github.com/ianlancetaylor/libbacktrace
+[submodule "libfuse"]
+	path = libfuse
+	url = https://github.com/libfuse/libfuse.git
