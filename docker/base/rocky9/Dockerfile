@@ -1,11 +1,18 @@
-# FROM harbor.zetyun.cn/dingofs/rockylinux:9.3
-FROM rockylinux/rockylinux:9.3
+FROM harbor.zetyun.cn/dingofs/rockylinux:9.3
+# FROM rockylinux/rockylinux:9.3
 
 ENV TZ=Asia/Shanghai
 
 SHELL ["/bin/bash", "-c"]
 
-COPY cmake-3.30.1-linux-x86_64.tar.gz musl-1.2.5.tar.gz protoc-25.1-linux-x86_64.zip go1.23.4.linux-amd64.tar.gz bazel-4.2.4-linux-x86_64 jemalloc-5.3.0.tar.bz2 /tmp/
+# wget -P /tmp/ https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
+# wget -P /tmp/ https://musl.libc.org/releases/musl-1.2.5.tar.gz
+# wget -P /tmp/ https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protoc-25.1-linux-x86_64.zip
+# wget -P /tmp/ https://golang.org/dl/go1.23.4.linux-amd64.tar.gz
+# wget -P /tmp/ https://github.com/bazelbuild/bazel/releases/download/4.2.4/bazel-4.2.4-linux-x86_64
+# wget -P /tmp/ https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
+# wget -P /tmp/ https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+COPY cmake-3.30.1-linux-x86_64.tar.gz musl-1.2.5.tar.gz protoc-25.1-linux-x86_64.zip go1.23.4.linux-amd64.tar.gz bazel-4.2.4-linux-x86_64 jemalloc-5.3.0.tar.bz2 ninja-linux.zip /tmp/
 
 # Step 1: Update the repository configuration to use Aliyun mirrors
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
@@ -23,6 +30,8 @@ RUN dnf update -y  \
     && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo ${TZ} > /etc/timezone
 
+RUN pip3 install -U meson
+
 RUN cd /tmp && tar -zxvf cmake-3.30.1-linux-x86_64.tar.gz \
     && cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/  \
     && cp -rf cmake-3.30.1-linux-x86_64/share/* /usr/local/share \
@@ -37,6 +46,8 @@ RUN cd /tmp && tar -zxvf musl-1.2.5.tar.gz && cd musl-1.2.5 && ./configure && ma
 RUN cd /tmp && cp bazel-4.2.4-linux-x86_64 /usr/bin/bazel && chmod a+x /usr/bin/bazel
 
 RUN cd /tmp && tar -xjvf jemalloc-5.3.0.tar.bz2 && cd jemalloc-5.3.0 && ./configure && make && make install
+
+RUN cd /tmp && unzip ninja-linux.zip -d /usr/local/bin && chmod +x /usr/local/bin/ninja
 
 # Install build dependencies
 RUN dnf groupinstall -y "Development Tools"

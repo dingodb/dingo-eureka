@@ -14,6 +14,8 @@ RUN dnf update -y  \
     && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo ${TZ} > /etc/timezone
 
+RUN pip3 install -U meson
+
 RUN cd /tmp && tar -zxvf cmake-3.30.1-linux-x86_64.tar.gz \
     && cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/  \
     && cp -rf cmake-3.30.1-linux-x86_64/share/* /usr/local/share \
@@ -28,6 +30,8 @@ RUN cd /tmp && tar -zxvf musl-1.2.5.tar.gz && cd musl-1.2.5 && ./configure && ma
 RUN cd /tmp && cp bazel-4.2.4-linux-x86_64 /usr/bin/bazel && chmod a+x /usr/bin/bazel
 
 RUN cd /tmp && tar -xjvf jemalloc-5.3.0.tar.bz2 && cd jemalloc-5.3.0 && ./configure && make && make install
+
+RUN cd /tmp && unzip ninja-linux.zip -d /usr/local/bin && chmod +x /usr/local/bin/ninja
 
 # Install build dependencies
 RUN dnf groupinstall -y "Development Tools"
