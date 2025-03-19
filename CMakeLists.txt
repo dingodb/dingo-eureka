@@ -650,14 +650,17 @@ ExternalProject_Add(curl
         -DBUILD_CURL_EXE=OFF
         -DCURL_DISABLE_LDAP=ON
         -DBUILD_SHARED_LIBS=OFF
-        -DBUILD_STATIC_CURL=OFF
         -DCURL_USE_LIBPSL=OFF
         -DUSE_LIBIDN2=OFF
+        -DHAVE_LIBZ=ON
+        -DHAVE_ZSTD=ON
+        -DZSTD_INCLUDE_DIR=${INSTALL_PATH}/include
+        -DZSTD_LIBRARY=${INSTALL_PATH}/lib/libzstd.a
    CMAKE_CACHE_ARGS
        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-    DEPENDS zlib openssl
+    DEPENDS zlib openssl zstd
 )
 
 # used by fs
