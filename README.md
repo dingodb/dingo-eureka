@@ -105,7 +105,7 @@ make -j 32
 | memcache          | v1.x          |
 | openssl           | 3.4.0         |
 | spdlog            | v1.15.1       |
-| curl              | curl-8_9_1    |
+| curl              | curl-8_12_1   |
 | opentelemetry-cpp | main          |
 | aws-sdk-cpp       | 1.11.400      |
 | libuuid           | master        |
