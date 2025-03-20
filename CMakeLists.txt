@@ -779,7 +779,7 @@ ExternalProject_Add(
                          -Dexamples=false
                          -Duseroot=false
                          -Dudevrulesdir=${INSTALL_PATH}/include/fuse3/etc
-                         -Dinitscriptdir=${INSTALL_PATH}/include/fuse3/etc
+                         -Dinitscriptdir=
                          -Dsysconfdir=${INSTALL_PATH}/include/fuse3/etc
     BUILD_COMMAND       meson compile -C ${LIBFUSE_BINARY_DIR}
     INSTALL_COMMAND     meson install -C ${LIBFUSE_BINARY_DIR}
