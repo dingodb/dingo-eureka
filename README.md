@@ -102,3 +102,4 @@ make -j 32
 | hdf5              | hdf5_1.14.4.2 |
 | libfuse           | master        |
 | double-conversion | master        |
+| numactl           | master        |
