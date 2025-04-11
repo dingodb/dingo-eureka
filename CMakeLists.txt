@@ -785,3 +785,19 @@ ExternalProject_Add(
     INSTALL_COMMAND     meson install -C ${LIBFUSE_BINARY_DIR}
     BUILD_ALWAYS        TRUE
 )
+
+
+# used by fs
+ExternalProject_Add(double-conversion
+    PREFIX double-conversion
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/double-conversion
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+        -DBUILD_SHARED_LIBS=OFF
+        -DBUILD_TESTING=OFF
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+)
