@@ -100,3 +100,6 @@
 [submodule "double-conversion"]
 	path = double-conversion
 	url = https://github.com/google/double-conversion.git
+[submodule "numactl"]
+	path = numactl
+	url = https://github.com/numactl/numactl.git
