@@ -801,3 +801,14 @@ ExternalProject_Add(double-conversion
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
+
+# used by fs
+ExternalProject_Add(numactl
+    PREFIX numactl
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/numactl
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND sh autogen.sh
+            COMMAND sh configure --prefix=${INSTALL_PATH} --enable-shared=no --enable-static=yes
+        BUILD_COMMAND $(MAKE)
+        INSTALL_COMMAND $(MAKE) install
+)
