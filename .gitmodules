@@ -103,3 +103,6 @@
 [submodule "numactl"]
 	path = numactl
 	url = https://github.com/numactl/numactl.git
+[submodule "libevent"]
+	path = libevent
+	url = https://github.com/libevent/libevent.git

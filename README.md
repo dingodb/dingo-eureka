@@ -103,3 +103,4 @@ make -j 32
 | libfuse           | master        |
 | double-conversion | master        |
 | numactl           | master        |
+| libevent          | master        |
