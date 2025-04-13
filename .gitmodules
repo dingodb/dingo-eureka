@@ -106,3 +106,6 @@
 [submodule "libevent"]
 	path = libevent
 	url = https://github.com/libevent/libevent.git
+[submodule "boost"]
+	path = boost
+	url = https://github.com/boostorg/boost.git

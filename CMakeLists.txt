@@ -834,3 +834,34 @@ ExternalProject_Add(libevent
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
+
+# used by fs
+string(TOLOWER "${CMAKE_BUILD_TYPE}" TMP_BUILD_TYPE)
+if (TMP_BUILD_TYPE STREQUAL "debug")
+    set(BOOST_BUILD_TYPE "debug")
+elseif (BOOST_BUILD_TYPE STREQUAL "release")
+    set(BOOST_BUILD_TYPE "release")
+elseif (TMP_BUILD_TYPE STREQUAL "relwithdebinfo")
+    set(BOOST_BUILD_TYPE "profile")
+else()
+    set(BOOST_BUILD_TYPE "release")
+endif()
+message("boost buildtype is ${BOOST_BUILD_TYPE}")
+
+ExternalProject_Add(boost
+    PREFIX boost
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/boost
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND sh bootstrap.sh --prefix=${INSTALL_PATH}
+    BUILD_COMMAND ./b2 variant=${BOOST_BUILD_TYPE}
+        install
+        link=static
+        runtime-link=static
+        --with-system
+        --with-filesystem
+        --with-program_options
+        --with-context
+        --with-thread
+        --with-regex
+    INSTALL_COMMAND ""
+)
