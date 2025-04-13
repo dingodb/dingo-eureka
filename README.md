@@ -104,3 +104,4 @@ make -j 32
 | double-conversion | master        |
 | numactl           | master        |
 | libevent          | master        |
+| boost             | 1.74.0        |
