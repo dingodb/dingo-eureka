@@ -786,7 +786,6 @@ ExternalProject_Add(
     BUILD_ALWAYS        TRUE
 )
 
-
 # used by fs
 ExternalProject_Add(double-conversion
     PREFIX double-conversion
@@ -808,9 +807,9 @@ ExternalProject_Add(numactl
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/numactl
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND sh autogen.sh
-            COMMAND sh configure --prefix=${INSTALL_PATH} --enable-shared=no --enable-static=yes
-        BUILD_COMMAND $(MAKE)
-        INSTALL_COMMAND $(MAKE) install
+    COMMAND sh configure --prefix=${INSTALL_PATH} --enable-shared=no --enable-static=yes
+    BUILD_COMMAND $(MAKE)
+    INSTALL_COMMAND $(MAKE) install
 )
 
 # used by fs
@@ -865,3 +864,71 @@ ExternalProject_Add(boost
         --with-regex
     INSTALL_COMMAND ""
 )
+
+# 3fs libusrbio
+option(WITH-LIBUSRBIO "Build 3fs usrbio library" ON)
+
+cmake_host_system_information(RESULT PRETTY_NAME QUERY DISTRIB_PRETTY_NAME)
+if (WITH-LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
+    set(LIBUSRBIO_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libusrbio)
+    set(LIBUSRBIO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libusrbio/build)
+
+    execute_process(
+        # if patch is appled,next appled will failed,so we need to reset the git
+        COMMAND sh -c "git reset --hard && git clean -fd && \
+                       git submodule foreach --recursive 'git reset --hard && git clean -fd'"
+        OUTPUT_QUIET
+        ERROR_QUIET  
+        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR} 
+    )
+    message(STATUS "apply patch to 3fs usrbio")
+    execute_process(
+        COMMAND ./patches/apply.sh
+        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR}
+    )
+    # Preprocess 3fs makefile
+    execute_process(
+        COMMAND sed -i -E "/CodeCoverage.cmake|CLangFormat.cmake|CLangTidy.cmake|DumpConfig.cmake|Jemalloc.cmake|ApacheArrow.cmake/d" ${LIBUSRBIO_SOURCES_DIR}/CMakeLists.txt
+    )
+    file(WRITE "${LIBUSRBIO_SOURCES_DIR}/src/lib/api/CMakeLists.txt" [=[
+        target_add_lib(hf3fs_api client-lib-common storage-client numa rt)
+        add_library(usrbio STATIC
+            $<TARGET_OBJECTS:hf3fs_api>
+            $<TARGET_OBJECTS:client-lib-common>
+            $<TARGET_OBJECTS:core-user-fbs>
+            $<TARGET_OBJECTS:common>
+            $<TARGET_OBJECTS:fmt>
+            $<TARGET_OBJECTS:scn::scn>
+        )
+    ]=])
+
+    ExternalProject_Add(
+        libusrbio
+        SOURCE_DIR  ${LIBUSRBIO_SOURCES_DIR}
+        BINARY_DIR  ${LIBUSRBIO_BINARY_DIR}
+        CMAKE_ARGS
+            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+            -DCMAKE_CXX_COMPILER=clang++-14
+            -DCMAKE_C_COMPILER=clang-14
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${LIBUSRBIO_BINARY_DIR}/lib
+            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${LIBUSRBIO_BINARY_DIR}/lib
+            -DBOOST_LINK_STATIC=ON
+            -DBoost_USE_STATIC_RUNTIME=ON
+            # Using 3fs built-in libfmt-v10 library
+            -DCMAKE_CXX_FLAGS="-I${LIBUSRBIO_SOURCES_DIR}/third_party/fmt/include"
+        CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        BUILD_COMMAND  ${CMAKE_COMMAND} --build ${LIBUSRBIO_BINARY_DIR} --target usrbio -j
+        # copy library to install path
+        COMMAND cp ${LIBUSRBIO_SOURCES_DIR}/src/lib/api/hf3fs_usrbio.h ${INSTALL_PATH}/include/
+        COMMAND cp ${LIBUSRBIO_BINARY_DIR}/lib/libfolly.a ${INSTALL_PATH}/lib/
+        COMMAND cp ${LIBUSRBIO_BINARY_DIR}/lib/libusrbio.a ${INSTALL_PATH}/lib/
+        INSTALL_COMMAND ""
+        BUILD_ALWAYS        TRUE
+        DEPENDS gflags glog double-conversion libevent numactl openssl boost
+    )
+
+endif()
+
+
