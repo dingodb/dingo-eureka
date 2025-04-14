@@ -30,6 +30,7 @@ In Ubuntu, /bin/sh points to /bin/dash by default. We need to use /bin/bash as d
 sudo apt update
 sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip
 sudo apt install -y meson ninja-build
+sudo apt install  gcc-12 g++-12 clang-14 libibverbs-dev #for usrbio
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
@@ -105,3 +106,4 @@ make -j 32
 | numactl           | master        |
 | libevent          | master        |
 | boost             | 1.74.0        |
+| libusrbio         | main          |
