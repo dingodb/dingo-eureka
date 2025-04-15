@@ -697,7 +697,7 @@ ExternalProject_Add(aws-sdk-cpp
         -DBUILD_SHARED_LIBS=OFF
         -DENABLE_TESTING=OFF
         -DAUTORUN_UNIT_TESTS=OFF
-        -DBUILD_ONLY=s3
+        -DBUILD_ONLY=s3$<SEMICOLON>s3-crt
         -DBUILD_OPTEL=ON
         -DBUILD_OPTEL_OTLP_BENCHMARKS=ON # if not turn on the opentelemetry cmake find will fail
     CMAKE_CACHE_ARGS
