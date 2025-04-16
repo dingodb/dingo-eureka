@@ -538,12 +538,27 @@ if(NOT DEFINED GPERFTOOLS_SETUP_DONE)
     file(WRITE ${GPERFTOOLS_BUILD_DIR}/copy_repo.sh
          "mkdir -p ${GPERFTOOLS_BUILD_DIR} && cp -rf ${GPERFTOOLS_SOURCES_DIR}/* ${GPERFTOOLS_BUILD_DIR}/")
     execute_process(COMMAND sh ${GPERFTOOLS_BUILD_DIR}/copy_repo.sh)
+    
+    # get libtoolize version to check if it is lower or higher than 2.5.0 
+    execute_process(
+        COMMAND libtoolize --version
+        OUTPUT_VARIABLE LIBTOOLIZE_VERSION_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" LIBTOOLIZE_VERSION ${LIBTOOLIZE_VERSION_OUTPUT})
+    message(STATUS "Detected libtoolize version: ${LIBTOOLIZE_VERSION}")
+    if(LIBTOOLIZE_VERSION VERSION_LESS "2.5.0")
+        set(LIBTOOL_PATCH_COMMAND COMMAND patch --forward -t --reject-file=- m4/libtool.m4 m4/libtool.patch)
+    else()
+        set(LIBTOOL_PATCH_COMMAND "")
+    endif()
+    
     ExternalProject_Add(gperftools
         PREFIX gperftools
         SOURCE_DIR ${GPERFTOOLS_BUILD_DIR}
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND sh autoreconf -i -f 
-            COMMAND patch --forward -t --reject-file=- m4/libtool.m4 m4/libtool.patch 
+            ${LIBTOOL_PATCH_COMMAND}
             COMMAND sh autoreconf -i
             COMMAND sh configure --prefix=${INSTALL_PATH} --enable-shared=no --enable-static=yes --with-pic --enable-libunwind --enable-cpu-profiler --enable-heap-profiler --enable-heap-checker
         BUILD_COMMAND $(MAKE)
