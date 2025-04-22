@@ -817,12 +817,16 @@ ExternalProject_Add(double-conversion
 )
 
 # used by fs
+set(NUMACTL_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/numactl)
+set(NUMACTL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/numactl/build)
+
 ExternalProject_Add(numactl
     PREFIX numactl
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/numactl
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND sh autogen.sh
-    COMMAND sh configure --prefix=${INSTALL_PATH} --enable-shared=no --enable-static=yes
+    SOURCE_DIR ${NUMACTL_SOURCES_DIR}
+    BINARY_DIR ${NUMACTL_BINARY_DIR}
+    BUILD_IN_SOURCE 0
+    CONFIGURE_COMMAND cd <SOURCE_DIR> && sh autogen.sh
+    COMMAND cd <BINARY_DIR> && sh <SOURCE_DIR>/configure --prefix=${INSTALL_PATH} --enable-shared=no --enable-static=yes
     BUILD_COMMAND $(MAKE)
     INSTALL_COMMAND $(MAKE) install
 )
