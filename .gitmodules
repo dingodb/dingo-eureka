@@ -115,3 +115,6 @@
 [submodule "rdma-core"]
 	path = rdma-core
 	url = https://github.com/linux-rdma/rdma-core.git
+[submodule "librados"]
+	path = librados
+	url = https://github.com/ceph/ceph.git
