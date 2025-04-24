@@ -112,3 +112,6 @@
 [submodule "libusrbio"]
 	path = libusrbio
 	url = https://github.com/deepseek-ai/3fs
+[submodule "rdma-core"]
+	path = rdma-core
+	url = https://github.com/linux-rdma/rdma-core.git
