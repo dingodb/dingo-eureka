@@ -107,3 +107,4 @@ make -j 32
 | libevent          | master        |
 | boost             | 1.74.0        |
 | libusrbio         | main          |
+| rdma-core         | v57.0         |
