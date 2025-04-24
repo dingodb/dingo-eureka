@@ -854,41 +854,45 @@ ExternalProject_Add(libevent
 )
 
 # used by fs
-string(TOLOWER "${CMAKE_BUILD_TYPE}" TMP_BUILD_TYPE)
-if (TMP_BUILD_TYPE STREQUAL "debug")
-    set(BOOST_BUILD_TYPE "debug")
-elseif (BOOST_BUILD_TYPE STREQUAL "release")
-    set(BOOST_BUILD_TYPE "release")
-elseif (TMP_BUILD_TYPE STREQUAL "relwithdebinfo")
-    set(BOOST_BUILD_TYPE "profile")
-else()
-    set(BOOST_BUILD_TYPE "release")
+option(WITH_BOOST "Build boost library" ON)
+
+if (WITH_BOOST)
+    set(BOOST_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/boost)
+    set(BOOST_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/boost/build)
+
+    ExternalProject_Add(boost
+        SOURCE_DIR ${BOOST_SOURCES_DIR}
+        BINARY_DIR ${BOOST_BINARY_DIR}
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ${CMAKE_COMMAND} -B <BINARY_DIR> -S <SOURCE_DIR>
+            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR=${INSTALL_PATH}/lib
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+            -DBUILD_SHARED_LIBS=OFF
+            -DBUILD_TESTING=OFF
+            -DBOOST_RUNTIME_LINK=STATIC
+            -DBOOST_IOSTREAMS_ENABLE_ZLIB=ON
+            -DBOOST_IOSTREAMS_ENABLE_ZSTD=OFF
+            -DBOOST_IOSTREAMS_ENABLE_BZIP2=OFF
+            -DBOOST_IOSTREAMS_ENABLE_LZMA=OFF
+        INSTALL_COMMAND $(MAKE) install
+        BUILD_ALWAYS TRUE
+        DEPENDS zlib zstd
+    )
 endif()
-message("boost buildtype is ${BOOST_BUILD_TYPE}")
 
-ExternalProject_Add(boost
-    PREFIX boost
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/boost
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND sh bootstrap.sh --prefix=${INSTALL_PATH}
-    BUILD_COMMAND ./b2 variant=${BOOST_BUILD_TYPE}
-        install
-        link=static
-        runtime-link=static
-        --with-system
-        --with-filesystem
-        --with-program_options
-        --with-context
-        --with-thread
-        --with-regex
-    INSTALL_COMMAND ""
-)
-
+# used by fs
 # 3fs libusrbio
-option(WITH-LIBUSRBIO "Build 3fs usrbio library" ON)
+option(WITH_LIBUSRBIO "Build 3fs usrbio library" ON)
 
 cmake_host_system_information(RESULT PRETTY_NAME QUERY DISTRIB_PRETTY_NAME)
-if (WITH-LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
+if (WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
+    if(NOT WITH_BOOST)
+        message(FATAL_ERROR "LIBUSRBIO requires BOOST,please enable by WITH_BOOST")
+    endif()
+
     set(LIBUSRBIO_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libusrbio)
     set(LIBUSRBIO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libusrbio/build)
 
@@ -950,7 +954,6 @@ if (WITH-LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
 
 endif()
 
-
 # used by fs
 set(RDMACORE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rdma-core)
 set(RDMACORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/rdma-core/build)
@@ -971,6 +974,89 @@ ExternalProject_Add(rdma-core
     COMMAND cp -RL <BINARY_DIR>/include/rdma ${INSTALL_PATH}/include/
     COMMAND cp <BINARY_DIR>/lib/librdmacm.a  ${INSTALL_PATH}/lib/
     COMMAND cp <BINARY_DIR>/lib/libibverbs.a ${INSTALL_PATH}/lib/
+    COMMAND cp <BINARY_DIR>/lib/pkgconfig/libibverbs.pc ${INSTALL_PATH}/lib/pkgconfig
+    COMMAND cp <BINARY_DIR>/lib/pkgconfig/librdmacm.pc ${INSTALL_PATH}/lib/pkgconfig
     INSTALL_COMMAND ""
     BUILD_ALWAYS TRUE
 )
+
+# used by fs
+# ceph librados
+option(WITH_LIBRADOS "Build ceph rados library" ON)
+
+if (WITH_LIBRADOS)  
+    if(NOT WITH_BOOST)
+        message(FATAL_ERROR "LIBRADOS requires BOOST,please enable by WITH_BOOST")
+    endif()
+
+    set(LIBRADOS_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/librados)
+    set(LIBRADOS_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/librados/build)
+
+    #reset ceph cmake file
+    execute_process(
+        COMMAND sh -c "git reset --hard && git clean -dfx && git submodule foreach --recursive 'git reset --hard && git clean -dfx'"
+        OUTPUT_QUIET
+        ERROR_QUIET
+        WORKING_DIRECTORY ${LIBRADOS_SOURCES_DIR} 
+    )
+    # Preprocess ceph cmake file
+    file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
+        add_library(rados-static STATIC
+        librados_c.cc
+        librados_cxx.cc
+        ${ceph_common_objs}
+        $<TARGET_OBJECTS:crc32>
+        $<TARGET_OBJECTS:arch>
+        $<TARGET_OBJECTS:librados_impl>
+        $<TARGET_OBJECTS:osdc>
+        $<TARGET_OBJECTS:cls_lock_client>
+        $<TARGET_OBJECTS:json_spirit>
+        )
+    ]=])
+
+    ExternalProject_Add(librados
+        SOURCE_DIR ${LIBRADOS_SOURCES_DIR}
+        BINARY_DIR ${LIBRADOS_BINARY_DIR}
+        CONFIGURE_COMMAND ${CMAKE_COMMAND} -GNinja -S <SOURCE_DIR> -B <BINARY_DIR>
+            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DENABLE_GIT_VERSION=OFF
+            -DWITH_FUSE=OFF
+            -DWITH_RADOSGW_AMQP_ENDPOINT=OFF
+            -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF
+            -DWITH_BABELTRACE=OFF
+            -DWITH_SEASTAR=OFF
+            -DWITH_LIBCEPHFS=OFF
+            -DWITH_CEPHFS=OFF
+            -DWITH_MGR=OFF
+            -DWITH_RADOSGW=OFF
+            -DWITH_RBD=OFF
+            -DWITH_KRBD=OFF
+            -DWITH_TESTS=OFF
+            -DWITH_MANPAGE=OFF
+            -DENABLE_SHARED=OFF
+            -DWITH_STATIC_LIBSTDCXX=ON
+            -DWITH_LTTNG=OFF
+            -DWITH_SYSTEMD=OFF
+            -DWITH_JAEGER=OFF
+            -DWITH_OPENLDAP=OFF
+            -DWITH_BLKIN=OFF
+            -DWITH_LIBCEPHSQLITE=OFF
+            -DWITH_BLUESTORE=OFF
+            -DWITH_QATZIP=OFF
+            -DWITH_QATLIB=OFF
+            -DWITH_FMT_HEADER_ONLY=ON
+            -DWITH_SYSTEM_BOOST=ON
+            -DBoost_USE_STATIC_LIBS=ON
+            -DBoost_USE_STATIC_RUNTIME=ON
+            # Using ceph built-in libfmt-v9 library
+            -DCMAKE_CXX_FLAGS="-I<SOURCE_DIR>/src/fmt/include"
+        BUILD_COMMAND ninja -C <BINARY_DIR> rados-static
+        # copy library to install path
+        COMMAND cp -RL <SOURCE_DIR>/src/include/rados ${INSTALL_PATH}/include/
+        COMMAND cp <BINARY_DIR>/lib/librados-static.a ${INSTALL_PATH}/lib/librados.a
+        INSTALL_COMMAND ""
+        BUILD_ALWAYS TRUE
+        DEPENDS openssl boost rdma-core
+    )
+endif()
