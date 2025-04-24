@@ -951,3 +951,26 @@ if (WITH-LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
 endif()
 
 
+# used by fs
+set(RDMACORE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rdma-core)
+set(RDMACORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/rdma-core/build)
+
+ExternalProject_Add(rdma-core
+    PREFIX rdma-core
+    SOURCE_DIR ${RDMACORE_SOURCES_DIR}
+    BINARY_DIR ${RDMACORE_BINARY_DIR}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -GNinja -S <SOURCE_DIR> -B <BINARY_DIR>
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DENABLE_STATIC=ON
+        -DENABLE_VALGRIND=OFF
+        -DENABLE_RESOLVE_NEIGH=OFF
+        -DNO_MAN_PAGES=ON
+    BUILD_COMMAND ninja -C <BINARY_DIR>
+    # copy library to install path
+    COMMAND cp -RL <BINARY_DIR>/include/infiniband ${INSTALL_PATH}/include/
+    COMMAND cp -RL <BINARY_DIR>/include/rdma ${INSTALL_PATH}/include/
+    COMMAND cp <BINARY_DIR>/lib/librdmacm.a  ${INSTALL_PATH}/lib/
+    COMMAND cp <BINARY_DIR>/lib/libibverbs.a ${INSTALL_PATH}/lib/
+    INSTALL_COMMAND ""
+    BUILD_ALWAYS TRUE
+)
