@@ -12,9 +12,9 @@ libfuse compilation requires Meson and Ninja:
 
 ```sh
 sudo dnf install -y epel-release
-sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch autoconf automake libtool python3-pip python3-cython pkgconfig
+sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch autoconf automake libtool python3-pip pkgconfig
 sudo dnf --enablerepo=crb install -y meson ninja-build
-sudo dnf install -y systemd-devel libblkid keyutils-libs-devel libcap-devel #for ceph librados
+sudo dnf install -y systemd-devel libblkid keyutils-libs-devel libcap-devel && sudo pip3 install cython PyYAML #for ceph librados
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
@@ -32,7 +32,7 @@ sudo apt update
 sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip pkg-config
 sudo apt install -y meson ninja-build
 sudo apt install  gcc-12 g++-12 clang-14 libibverbs-dev #for usrbio
-sudo apt install -y libudev-dev libblkid-dev libkeyutils-dev libcap-dev && sudo pip3 install cython #for ceph librados
+sudo apt install -y libudev-dev libblkid-dev libkeyutils-dev libcap-dev && sudo pip3 install cython PyYAML #for ceph librados
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
