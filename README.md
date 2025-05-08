@@ -39,7 +39,7 @@ tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
 sudo cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ && sudo cp -rf  cmake-3.30.1-linux-x86_64/share/* /usr/local/share && rm -rf cmake-3.30.1-linux-x86_64
 ```
 
-## How to build 
+## How to build
 
 ### Download the Submodule
 
@@ -51,7 +51,7 @@ git submodule sync --recursive
 git submodule update --init --recursive --progress
 ```
 
-### Build and Install 
+### Build and Install
 The default install path is ~/.local/dingo-eureka, if you want to use custome install path, pass `-DINSTALL_PATH=you-path` to cmake
 
 In the source dir
@@ -101,6 +101,7 @@ cmake -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_LIBUSRBIO=OFF ..
 | gflags            | master        |
 | glog              | v0.6.0        |
 | googletest        | main          |
+| toml11            | main          |
 | fmt               | 11.1.3        |
 | nlohmann-json     | develop       |
 | rapidjson         | master        |
