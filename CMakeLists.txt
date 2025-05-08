@@ -114,6 +114,18 @@ ExternalProject_Add(gtest
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
 
+ExternalProject_Add(toml11
+    PREFIX toml11
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/toml11
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DTOML11_PRECOMPILE=ON
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+)
+
 ExternalProject_Add(fmt
     PREFIX fmt
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fmt
@@ -126,17 +138,17 @@ ExternalProject_Add(fmt
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
 
-# used by sdk/fs 
+# used by sdk/fs
 ExternalProject_Add(nlohmann-json
     PREFIX nlohmann-json
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nlohmann-json
-    CMAKE_ARGS 
+    CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
         -DJSON_BuildTests=OFF
         -DJSON_MultipleHeaders=ON
         -DJSON_Install=ON
-    CMAKE_CACHE_ARGS 
+    CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
@@ -159,7 +171,7 @@ ExternalProject_Add(rapidjson
 )
 
 # used by fs
-# used by grpc protobuf 
+# used by grpc protobuf
 ExternalProject_Add(jsoncpp
     PREFIX jsoncpp
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp
@@ -186,7 +198,7 @@ file(WRITE ${ZLIB_BINARY_DIR}/copy_repo.sh
 
 execute_process(COMMAND sh ${ZLIB_BINARY_DIR}/copy_repo.sh)
 
-# used by sdk/fs 
+# used by sdk/fs
 ExternalProject_Add(zlib
     PREFIX zlib
     SOURCE_DIR ${ZLIB_BINARY_DIR}
@@ -207,7 +219,7 @@ ExternalProject_Add(openssl
     PREFIX openssl
     SOURCE_DIR ${OPENSSL_SOURCES_DIR}
     BINARY_DIR ${OPENSSL_BINARY_DIR}
-    CONFIGURE_COMMAND sh ${OPENSSL_SOURCES_DIR}/config -DOPENSSL_NO_SCTP -DOPENSSL_NO_KTLS  -DOPENSSL_USE_NODELETE -DOPENSSL_PIC -no-shared --prefix=${INSTALL_PATH} --libdir=lib 
+    CONFIGURE_COMMAND sh ${OPENSSL_SOURCES_DIR}/config -DOPENSSL_NO_SCTP -DOPENSSL_NO_KTLS  -DOPENSSL_USE_NODELETE -DOPENSSL_PIC -no-shared --prefix=${INSTALL_PATH} --libdir=lib
     BUILD_COMMAND $(MAKE)
     INSTALL_COMMAND ${CMAKE_COMMAND} -E chdir ${OPENSSL_BINARY_DIR} $(MAKE) install_sw
 )
@@ -245,8 +257,8 @@ ExternalProject_Add(utf8_range
   DEPENDS absl
 )
 
-# used by sdk/fs 
-# used by grpc 
+# used by sdk/fs
+# used by grpc
 set(PROTOBUF_INSTALL_DIR ${INSTALL_PATH})
 set(PROTOBUF_INCLUDE_DIR
     "${PROTOBUF_INSTALL_DIR}/include"
@@ -286,7 +298,7 @@ ExternalProject_Add(protobuf
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
 #         -DCMAKE_INSTALL_LIBDIR:PATH=lib # v21.12
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib  # new version
-  DEPENDS absl utf8_range zlib jsoncpp 
+  DEPENDS absl utf8_range zlib jsoncpp
 )
 
 SET(GRPC_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/grpc)
@@ -306,7 +318,7 @@ ExternalProject_Add(c-ares
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
 
-# used by grpc 
+# used by grpc
 # Builds re2 project from the git submodule.
 ExternalProject_Add(re2
   PREFIX re2
@@ -338,9 +350,9 @@ endif()
 ExternalProject_Add(grpc
   PREFIX grpc
   SOURCE_DIR "${GRPC_SOURCES_DIR}"
-  CMAKE_ARGS 
+  CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DOPENSSL_USE_STATIC_LIBS=TRUE 
+        -DOPENSSL_USE_STATIC_LIBS=TRUE
   CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DgRPC_INSTALL:BOOL=ON
@@ -392,7 +404,7 @@ ExternalProject_Add(leveldb
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
 
-# used by sdk/fs 
+# used by sdk/fs
 # If minimal .a is need, you can set  WITH_DEBUG_SYMBOLS=OFF
 SET(BRPC_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/brpc/build)
 SET(DYNAMIC_ANNOTATIONS_HEADER_PATH ${INSTALL_PATH}/include/butil/third_party/dynamic_annotations/dynamic_annotations.h)
@@ -486,7 +498,7 @@ ExternalProject_Add(liburing
     PREFIX liburing
     SOURCE_DIR ${LIBURING_SOURCES_DIR}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND sh ${LIBURING_SOURCES_DIR}/configure  --prefix=${INSTALL_PATH} 
+    CONFIGURE_COMMAND sh ${LIBURING_SOURCES_DIR}/configure  --prefix=${INSTALL_PATH}
     BUILD_COMMAND $(MAKE)
     INSTALL_COMMAND $(MAKE) install
 )
@@ -538,8 +550,8 @@ if(NOT DEFINED GPERFTOOLS_SETUP_DONE)
     file(WRITE ${GPERFTOOLS_BUILD_DIR}/copy_repo.sh
          "mkdir -p ${GPERFTOOLS_BUILD_DIR} && cp -rf ${GPERFTOOLS_SOURCES_DIR}/* ${GPERFTOOLS_BUILD_DIR}/")
     execute_process(COMMAND sh ${GPERFTOOLS_BUILD_DIR}/copy_repo.sh)
-    
-    # get libtoolize version to check if it is lower or higher than 2.5.0 
+
+    # get libtoolize version to check if it is lower or higher than 2.5.0
     execute_process(
         COMMAND libtoolize --version
         OUTPUT_VARIABLE LIBTOOLIZE_VERSION_OUTPUT
@@ -552,12 +564,12 @@ if(NOT DEFINED GPERFTOOLS_SETUP_DONE)
     else()
         set(LIBTOOL_PATCH_COMMAND "")
     endif()
-    
+
     ExternalProject_Add(gperftools
         PREFIX gperftools
         SOURCE_DIR ${GPERFTOOLS_BUILD_DIR}
         BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND sh autoreconf -i -f 
+        CONFIGURE_COMMAND sh autoreconf -i -f
             ${LIBTOOL_PATCH_COMMAND}
             COMMAND sh autoreconf -i
             COMMAND sh configure --prefix=${INSTALL_PATH} --enable-shared=no --enable-static=yes --with-pic --enable-libunwind --enable-cpu-profiler --enable-heap-profiler --enable-heap-checker
@@ -578,7 +590,7 @@ ExternalProject_Add(libbacktrace
     PREFIX libbacktrace
     SOURCE_DIR ${LIBBACKTRACE_BINARY_DIR}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND sh ${LIBBACKTRACE_BINARY_DIR}/configure  --prefix=${INSTALL_PATH} 
+    CONFIGURE_COMMAND sh ${LIBBACKTRACE_BINARY_DIR}/configure  --prefix=${INSTALL_PATH}
     BUILD_COMMAND $(MAKE) AM_CFLAGS=-fPIC
     INSTALL_COMMAND $(MAKE) install
 )
@@ -715,14 +727,14 @@ ExternalProject_Add(curl
 ExternalProject_Add(opentelemetry-cpp
     PREFIX opentelemetry-cpp
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentelemetry-cpp
-    CMAKE_ARGS 
+    CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
         -DBUILD_SHARED_LIBS=OFF
         -DWITH_OTLP_GRPC=OFF
         -DWITH_OTLP_HTTP=ON
         -DWITH_PROMETHEUS=OFF
-        -DBUILD_TESTING=OFF 
+        -DBUILD_TESTING=OFF
         -DWITH_EXAMPLES=OFF
         -DWITH_EXAMPLES_HTTP=OFF
     CMAKE_CACHE_ARGS
@@ -751,7 +763,7 @@ ExternalProject_Add(aws-sdk-cpp
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-    DEPENDS curl zlib openssl opentelemetry-cpp 
+    DEPENDS curl zlib openssl opentelemetry-cpp
 )
 
 # used by fs
@@ -771,7 +783,7 @@ ExternalProject_Add(libuuid
 
 # used for sdk benchmark
 ExternalProject_Add(hdf5
-    PREFIX hdf5 
+    PREFIX hdf5
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/hdf5
     CMAKE_ARGS
         -C ${CMAKE_CURRENT_SOURCE_DIR}/hdf5/config/cmake/cacheinit.cmake
@@ -856,8 +868,8 @@ execute_process(
     # clean the files generated by autogen.sh
     COMMAND sh -c "git reset --hard && git clean -fdx"
     OUTPUT_QUIET
-    ERROR_QUIET  
-    WORKING_DIRECTORY ${NUMACTL_SOURCES_DIR} 
+    ERROR_QUIET
+    WORKING_DIRECTORY ${NUMACTL_SOURCES_DIR}
 )
 
 ExternalProject_Add(numactl
@@ -919,8 +931,8 @@ if (WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
         COMMAND sh -c "git reset --hard && git clean -fd && \
                        git submodule foreach --recursive 'git reset --hard && git clean -fd'"
         OUTPUT_QUIET
-        ERROR_QUIET  
-        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR} 
+        ERROR_QUIET
+        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR}
     )
     message(STATUS "apply patch to 3fs usrbio")
     execute_process(
@@ -1002,7 +1014,7 @@ ExternalProject_Add(rdma-core
 # ceph librados
 option(WITH_LIBRADOS "Build ceph rados library" ON)
 
-if (WITH_LIBRADOS)  
+if (WITH_LIBRADOS)
     if(NOT WITH_BOOST)
         message(FATAL_ERROR "LIBRADOS requires BOOST,please enable by WITH_BOOST")
     endif()
@@ -1015,7 +1027,7 @@ if (WITH_LIBRADOS)
         COMMAND sh -c "git reset --hard && git clean -dfx && git submodule foreach --recursive 'git reset --hard && git clean -dfx'"
         OUTPUT_QUIET
         ERROR_QUIET
-        WORKING_DIRECTORY ${LIBRADOS_SOURCES_DIR} 
+        WORKING_DIRECTORY ${LIBRADOS_SOURCES_DIR}
     )
     # Preprocess ceph cmake file
     file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
