@@ -114,17 +114,21 @@ ExternalProject_Add(gtest
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
 
-ExternalProject_Add(toml11
-    PREFIX toml11
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/toml11
-    CMAKE_ARGS
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DTOML11_PRECOMPILE=ON
-    CMAKE_CACHE_ARGS
-        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
-        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-)
+option(WITH_TOML11 "Build toml11 library" ON)
+
+if(WITH_TOML11)
+    ExternalProject_Add(toml11
+        PREFIX toml11
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/toml11
+        CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DTOML11_PRECOMPILE=ON
+        CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+    )
+endif()
 
 ExternalProject_Add(fmt
     PREFIX fmt
@@ -746,25 +750,29 @@ ExternalProject_Add(opentelemetry-cpp
     DEPENDS curl protobuf openssl nlohmann-json
 )
 
-# used by fs
-ExternalProject_Add(aws-sdk-cpp
-    PREFIX aws-sdk-cpp
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aws-sdk-cpp
-    CMAKE_ARGS
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
-        -DBUILD_SHARED_LIBS=OFF
-        -DENABLE_TESTING=OFF
-        -DAUTORUN_UNIT_TESTS=OFF
-        -DBUILD_ONLY=s3$<SEMICOLON>s3-crt
-        -DBUILD_OPTEL=ON
-        -DBUILD_OPTEL_OTLP_BENCHMARKS=ON # if not turn on the opentelemetry cmake find will fail
-    CMAKE_CACHE_ARGS
-        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
-        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
-        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-    DEPENDS curl zlib openssl opentelemetry-cpp
-)
+option(WITH_AWSSDKCPP "Build aws-sdk-cpp library" ON)
+
+if(WITH_AWSSDKCPP)
+    # used by fs
+    ExternalProject_Add(aws-sdk-cpp
+        PREFIX aws-sdk-cpp
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aws-sdk-cpp
+        CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+            -DBUILD_SHARED_LIBS=OFF
+            -DENABLE_TESTING=OFF
+            -DAUTORUN_UNIT_TESTS=OFF
+            -DBUILD_ONLY=s3$<SEMICOLON>s3-crt
+            -DBUILD_OPTEL=ON
+            -DBUILD_OPTEL_OTLP_BENCHMARKS=ON # if not turn on the opentelemetry cmake find will fail
+        CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
+            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+        DEPENDS curl zlib openssl opentelemetry-cpp
+    )
+endif()
 
 # used by fs
 ExternalProject_Add(libuuid
@@ -823,27 +831,31 @@ message("meson buildtype is ${MESON_BUILD_TYPE}")
 set(LIBFUSE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libfuse)
 set(LIBFUSE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libfuse/build)
 
-ExternalProject_Add(
-    libfuse
-    SOURCE_DIR          ${LIBFUSE_SOURCES_DIR}
-    BINARY_DIR          ${LIBFUSE_BINARY_DIR}
-    CONFIGURE_COMMAND   meson setup
-                         ${LIBFUSE_SOURCES_DIR}
-                         ${LIBFUSE_BINARY_DIR}
-                         --prefix=${INSTALL_PATH}
-                         --buildtype=${MESON_BUILD_TYPE}
-                         --default-library=static
-                         --libdir=lib
-                         --includedir=include
-                         -Dexamples=false
-                         -Duseroot=false
-                         -Dudevrulesdir=${INSTALL_PATH}/include/fuse3/etc
-                         -Dinitscriptdir=
-                         -Dsysconfdir=${INSTALL_PATH}/include/fuse3/etc
-    BUILD_COMMAND       meson compile -C ${LIBFUSE_BINARY_DIR}
-    INSTALL_COMMAND     meson install -C ${LIBFUSE_BINARY_DIR}
-    BUILD_ALWAYS        TRUE
-)
+option(WITH_LIBFUSE "Build fuse library" ON)
+
+if (NOT WITH_LIBFUSE)
+    ExternalProject_Add(
+        libfuse
+        SOURCE_DIR          ${LIBFUSE_SOURCES_DIR}
+        BINARY_DIR          ${LIBFUSE_BINARY_DIR}
+        CONFIGURE_COMMAND   meson setup
+                             ${LIBFUSE_SOURCES_DIR}
+                             ${LIBFUSE_BINARY_DIR}
+                             --prefix=${INSTALL_PATH}
+                             --buildtype=${MESON_BUILD_TYPE}
+                             --default-library=static
+                             --libdir=lib
+                             --includedir=include
+                             -Dexamples=false
+                             -Duseroot=false
+                             -Dudevrulesdir=${INSTALL_PATH}/include/fuse3/etc
+                             -Dinitscriptdir=
+                             -Dsysconfdir=${INSTALL_PATH}/include/fuse3/etc
+        BUILD_COMMAND       meson compile -C ${LIBFUSE_BINARY_DIR}
+        INSTALL_COMMAND     meson install -C ${LIBFUSE_BINARY_DIR}
+        BUILD_ALWAYS        TRUE
+    )
+endif()
 
 # used by fs
 ExternalProject_Add(double-conversion
