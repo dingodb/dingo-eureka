@@ -36,12 +36,14 @@ docker/base/rocky8/*
 docker/base/rocky9/*
 docker/base/ubuntu22/*
 docker/base/ubuntu24/*
+docker/base/manylinux/*
 
 !docker/base/rocky8/Dockerfile
 !docker/base/rocky9/Dockerfile
 !docker/base/rocky9/python3.12
 !docker/base/ubuntu22/Dockerfile
 !docker/base/ubuntu24/Dockerfile
+!docker/base/manylinux/Dockerfile
 
 build/
 
