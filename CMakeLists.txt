@@ -1081,12 +1081,19 @@ if (WITH_LIBRADOS)
             -DBoost_USE_STATIC_RUNTIME=ON
             # Using ceph built-in libfmt-v9 library
             -DCMAKE_CXX_FLAGS="-I<SOURCE_DIR>/src/fmt/include"
+            # OpenSSL configurations
+            -DOPENSSL_ROOT_DIR=${INSTALL_PATH}
+            -DOPENSSL_INCLUDE_DIR=${INSTALL_PATH}/include
+            -DOPENSSL_CRYPTO_LIBRARY=${INSTALL_PATH}/lib/libcrypto.a
+            -DOPENSSL_SSL_LIBRARY=${INSTALL_PATH}/lib/libssl.a
+            -DOPENSSL_LIBRARIES=${INSTALL_PATH}/lib/libcrypto.a;${INSTALL_PATH}/lib/libssl.a
+            -DOPENSSL_USE_STATIC_LIBS=ON
         BUILD_COMMAND ninja -C <BINARY_DIR> rados-static
         # copy library to install path
         COMMAND cp -RL <SOURCE_DIR>/src/include/rados ${INSTALL_PATH}/include/
         COMMAND cp <BINARY_DIR>/lib/librados-static.a ${INSTALL_PATH}/lib/librados.a
         INSTALL_COMMAND ""
         BUILD_ALWAYS TRUE
-        DEPENDS openssl boost rdma-core
+        DEPENDS openssl boost rdma-core curl
     )
 endif()
