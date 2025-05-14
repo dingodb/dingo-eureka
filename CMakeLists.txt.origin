@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.23.1...3.25 FATAL_ERROR)  # Add version range
-cmake_policy(VERSION 3.5...3.25)  # Explicit policy range
+cmake_minimum_required(VERSION 3.23.1 FATAL_ERROR)
 project(dingo-eureka C CXX)
 
 # third-party install path
@@ -64,7 +63,6 @@ ExternalProject_Add(gflags
        -DBUILD_STATIC_LIBS=ON
        -DBUILD_TESTING=OFF
        -DINSTALL_HEADERS=ON
-       -DCMAKE_POLICY_VERSION_MINIMUM=3.5
    CMAKE_CACHE_ARGS
        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -97,7 +95,6 @@ ExternalProject_Add(glog
         -DBUILD_SHARED_LIBS=OFF
         -DWITH_GFLAGS=ON
         -DWITH_UNWIND=OFF
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
         -Dgflags_DIR:STRING=${INSTALL_PATH}/lib/cmake/gflags
@@ -111,12 +108,27 @@ ExternalProject_Add(gtest
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
+
+option(WITH_TOML11 "Build toml11 library" ON)
+
+if(WITH_TOML11)
+    ExternalProject_Add(toml11
+        PREFIX toml11
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/toml11
+        CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DTOML11_PRECOMPILE=ON
+        CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+    )
+endif()
 
 ExternalProject_Add(fmt
     PREFIX fmt
@@ -124,7 +136,6 @@ ExternalProject_Add(fmt
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DFMT_TEST=OFF
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -141,7 +152,6 @@ ExternalProject_Add(nlohmann-json
         -DJSON_BuildTests=OFF
         -DJSON_MultipleHeaders=ON
         -DJSON_Install=ON
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -158,7 +168,6 @@ ExternalProject_Add(rapidjson
       -DRAPIDJSON_BUILD_DOC=OFF
       -DRAPIDJSON_BUILD_EXAMPLES=OFF
       -DRAPIDJSON_BUILD_TESTS=OFF
-      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -176,7 +185,6 @@ ExternalProject_Add(jsoncpp
         -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
         -DBUILD_SHARED_LIBS=OFF
         -DBUILD_OBJECT_LIBS=OFF
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -202,7 +210,6 @@ ExternalProject_Add(zlib
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DBUILD_SHARED_LIBS=OFF
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -233,7 +240,6 @@ ExternalProject_Add(absl
         -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
         -DABSL_USE_GOOGLETEST_HEAD=ON
         -DCMAKE_CXX_STANDARD=17
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -246,7 +252,6 @@ ExternalProject_Add(utf8_range
   CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_CXX_STANDARD=17
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -Dutf8_range_ENABLE_TESTS:BOOL=OFF
@@ -284,7 +289,6 @@ ExternalProject_Add(protobuf
   CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_CXX_STANDARD=17
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -Dprotobuf_BUILD_TESTS:BOOL=OFF
@@ -309,7 +313,6 @@ ExternalProject_Add(c-ares
   SOURCE_DIR "${GRPC_SOURCES_DIR}/third_party/cares/cares"
   CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCARES_SHARED:BOOL=OFF
@@ -326,7 +329,6 @@ ExternalProject_Add(re2
   SOURCE_DIR "${GRPC_SOURCES_DIR}/third_party/re2"
   CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -355,7 +357,6 @@ ExternalProject_Add(grpc
   CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DOPENSSL_USE_STATIC_LIBS=TRUE
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DgRPC_INSTALL:BOOL=ON
@@ -387,7 +388,6 @@ ExternalProject_Add(snappy
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DSNAPPY_BUILD_TESTS=OFF
         -DSNAPPY_BUILD_BENCHMARKS=OFF
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -402,7 +402,6 @@ ExternalProject_Add(leveldb
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DLEVELDB_BUILD_TESTS=OFF
         -DLEVELDB_BUILD_BENCHMARKS=OFF
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -431,7 +430,6 @@ ExternalProject_Add(brpc
       -DGFLAGS_INCLUDE_PATH=${GFLAGS_INCLUDE_DIR}
       -DGFLAGS_LIBRARY=${GFLAGS_LIBRARIES}
       -DPROTOC_LIB=${PROTOBUF_LIBRARIES}
-      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
       -DOPENSSL_ROOT_DIR:PATH=${INSTALL_PATH}
       -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
@@ -449,6 +447,36 @@ ExternalProject_Add(brpc
     DEPENDS zlib snappy protobuf leveldb gflags glog openssl
 )
 
+# used by fs
+SET(BRAFT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/braft/build)
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DUSE_BTHREAD_MUTEX)
+ExternalProject_Add(braft
+    PREFIX braft
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/braft
+    BINARY_DIR ${BRAFT_BINARY_DIR}
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DCMAKE_CXX_STANDARD=17
+        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+        -DBRPC_WITH_GLOG=ON
+        -Dgflags_DIR:STRING=${INSTALL_PATH}/lib/cmake/gflags
+        -DWITH_DEBUG_SYMBOLS=OFF
+        -DGFLAGS_INCLUDE_PATH=${GFLAGS_INCLUDE_DIR}
+        -DGFLAGS_LIB=${GFLAGS_LIBRARIES}
+        -DGLOG_INCLUDE_PATH=${GLOG_INCLUDE_DIR}
+        -DGLOG_LIB=${GLOG_LIBRARIES}
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+    BUILD_COMMAND $(MAKE) braft-static
+    INSTALL_COMMAND ""
+    COMMAND cp ${BRAFT_BINARY_DIR}/output/lib/libbraft.a ${INSTALL_PATH}/lib
+    COMMAND cp -r ${BRAFT_BINARY_DIR}/output/include ${INSTALL_PATH}
+    DEPENDS brpc
+)
+
 # use by rocksdb
 ExternalProject_Add(lz4
     PREFIX lz4
@@ -464,8 +492,8 @@ ExternalProject_Add(zstd
     PREFIX zstd
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/zstd
     CONFIGURE_COMMAND ""
-    BUILD_IN_SOURCE 1   
-    BUILD_COMMAND cd <SOURCE_DIR>/lib && $(MAKE)
+    BUILD_IN_SOURCE 1
+    BUILD_COMMAND $(MAKE)
     INSTALL_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> $(MAKE) PREFIX=${INSTALL_PATH} install
 )
 
@@ -500,7 +528,6 @@ ExternalProject_Add(rocksdb
         -DWITH_TOOLS=OFF
         -DWITH_TRACE_TOOLS=OFF
         -DPORTABLE=haswell
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DZLIB_ROOT:STRING=${INSTALL_PATH}
@@ -573,6 +600,100 @@ ExternalProject_Add(libbacktrace
 )
 
 # used by fs
+SET(INCBIN_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/incbin)
+ExternalProject_Add(incbin
+    PREFIX incbin
+    SOURCE_DIR "${INCBIN_SOURCES_DIR}"
+    BINARY_DIR "${INCBIN_SOURCES_DIR}"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${INSTALL_PATH}/include
+    COMMAND cp ${INCBIN_SOURCES_DIR}/incbin.h ${INSTALL_PATH}/include
+)
+
+# used by fs
+SET(LIBFIU_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libfiu)
+ExternalProject_Add(libfiu
+    PREFIX libfiu
+    SOURCE_DIR ${LIBFIU_SOURCES_DIR}
+    BUILD_IN_SOURCE ON
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND $(MAKE)
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> $(MAKE) PREFIX=${INSTALL_PATH} install
+)
+
+# used by fs
+ExternalProject_Add(crc32c
+    PREFIX crc32c
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/crc32c
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCRC32C_BUILD_TESTS=OFF
+        -DCRC32C_BUILD_BENCHMARKS=OFF
+        -DCRC32C_USE_GLOG=OFF
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+)
+
+# used by fs
+ExternalProject_Add(libevent
+    PREFIX libevent
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libevent
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+        -DEVENT__LIBRARY_TYPE=STATIC
+        -DEVENT__DISABLE_BENCHMARK=ON
+        -DEVENT__DISABLE_TESTS=ON
+        -DEVENT__DISABLE_REGRESS=ON
+        -DEVENT__DISABLE_SAMPLES=ON
+        -DEVENT__HAVE_GETHOSTBYNAME_R=ON
+        -DEVENT__HAVE_GETHOSTBYNAME_R_6_ARG=ON
+        -DEVENT__HAVE_GETHOSTBYNAME_R_3_ARG=OFF
+        -DEVENT__HAVE_GETHOSTBYNAME_R_5_ARG=OFF
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+)
+
+# used by fs
+ExternalProject_Add(memcache
+    PREFIX memcache
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/memcache
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+        -DBUILD_SHARED_LIBS=OFF
+        -DBUILD_DOCS=OFF
+        -DBUILD_DOCSONLY=OFF
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+    DEPENDS libevent
+)
+
+# used by fs
+ExternalProject_Add(spdlog
+    PREFIX spdlog
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spdlog
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+        -DSPDLOG_BUILD_SHARED=OFF
+        -DSPDLOG_BUILD_EXAMPLE_HO=OFF
+        -DSPDLOG_FMT_EXTERNAL=ON
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+    DEPENDS fmt
+)
+
+# used by fs
 # used by aws
 ExternalProject_Add(curl
    PREFIX curl
@@ -598,12 +719,74 @@ ExternalProject_Add(curl
         -DZLIB_LIBRARY=${INSTALL_PATH}/lib/libz.a
         -DOPENSSL_ROOT_DIR=${INSTALL_PATH}
         -DOPENSSL_USE_STATIC_LIBS=ON
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
    CMAKE_CACHE_ARGS
        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
     DEPENDS zlib openssl zstd
+)
+
+# used by fs
+# used by aws
+ExternalProject_Add(opentelemetry-cpp
+    PREFIX opentelemetry-cpp
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentelemetry-cpp
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+        -DBUILD_SHARED_LIBS=OFF
+        -DWITH_OTLP_GRPC=OFF
+        -DWITH_OTLP_HTTP=ON
+        -DWITH_PROMETHEUS=OFF
+        -DBUILD_TESTING=OFF
+        -DWITH_EXAMPLES=OFF
+        -DWITH_EXAMPLES_HTTP=OFF
+    CMAKE_CACHE_ARGS
+        -DOPENSSL_ROOT_DIR:PATH=${INSTALL_PATH}
+        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+    DEPENDS curl protobuf openssl nlohmann-json
+)
+
+option(WITH_AWSSDKCPP "Build aws-sdk-cpp library" ON)
+
+if(WITH_AWSSDKCPP)
+    # used by fs
+    ExternalProject_Add(aws-sdk-cpp
+        PREFIX aws-sdk-cpp
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aws-sdk-cpp
+        CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+            -DBUILD_SHARED_LIBS=OFF
+            -DENABLE_TESTING=OFF
+            -DAUTORUN_UNIT_TESTS=OFF
+            -DBUILD_ONLY=s3$<SEMICOLON>s3-crt
+            -DBUILD_OPTEL=ON
+            -DBUILD_OPTEL_OTLP_BENCHMARKS=ON # if not turn on the opentelemetry cmake find will fail
+        CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
+            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+        DEPENDS curl zlib openssl opentelemetry-cpp
+    )
+endif()
+
+# used by fs
+ExternalProject_Add(libuuid
+    PREFIX libuuid
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libuuid-cmake
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+        -DLIBUUID_STATIC=ON
+        -DLIBUUID_SHARED=OFF
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
 )
 
 # used for sdk benchmark
@@ -623,10 +806,306 @@ ExternalProject_Add(hdf5
         -DHDF5_BUILD_JAVA=OFF
         -DHDF5_BUILD_FORTRAN=OFF
         -DHDF5_BUILD_HL_GIF_TOOLS=OFF
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
         -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
     DEPENDS zlib
 )
+
+# libfuse
+string(TOLOWER "${CMAKE_BUILD_TYPE}" TMP_BUILD_TYPE)
+if (TMP_BUILD_TYPE STREQUAL "debug")
+    set(MESON_BUILD_TYPE "debug")
+elseif (TMP_BUILD_TYPE STREQUAL "release")
+    set(MESON_BUILD_TYPE "release")
+elseif (TMP_BUILD_TYPE STREQUAL "relwithdebinfo")
+    set(MESON_BUILD_TYPE "debugoptimized")
+elseif (TMP_BUILD_TYPE STREQUAL "minsizerel")
+    set(MESON_BUILD_TYPE "minsize")
+else()
+    set(MESON_BUILD_TYPE "plain")
+endif()
+message("meson buildtype is ${MESON_BUILD_TYPE}")
+
+set(LIBFUSE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libfuse)
+set(LIBFUSE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libfuse/build)
+
+option(WITH_LIBFUSE "Build fuse library" ON)
+
+if (NOT WITH_LIBFUSE)
+    ExternalProject_Add(
+        libfuse
+        SOURCE_DIR          ${LIBFUSE_SOURCES_DIR}
+        BINARY_DIR          ${LIBFUSE_BINARY_DIR}
+        CONFIGURE_COMMAND   meson setup
+                             ${LIBFUSE_SOURCES_DIR}
+                             ${LIBFUSE_BINARY_DIR}
+                             --prefix=${INSTALL_PATH}
+                             --buildtype=${MESON_BUILD_TYPE}
+                             --default-library=static
+                             --libdir=lib
+                             --includedir=include
+                             -Dexamples=false
+                             -Duseroot=false
+                             -Dudevrulesdir=${INSTALL_PATH}/include/fuse3/etc
+                             -Dinitscriptdir=
+                             -Dsysconfdir=${INSTALL_PATH}/include/fuse3/etc
+        BUILD_COMMAND       meson compile -C ${LIBFUSE_BINARY_DIR}
+        INSTALL_COMMAND     meson install -C ${LIBFUSE_BINARY_DIR}
+        BUILD_ALWAYS        TRUE
+    )
+endif()
+
+# used by fs
+ExternalProject_Add(double-conversion
+    PREFIX double-conversion
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/double-conversion
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+        -DBUILD_SHARED_LIBS=OFF
+        -DBUILD_TESTING=OFF
+    CMAKE_CACHE_ARGS
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+)
+
+# used by fs
+set(NUMACTL_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/numactl)
+set(NUMACTL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/numactl/build)
+
+execute_process(
+    # clean the files generated by autogen.sh
+    COMMAND sh -c "git reset --hard && git clean -fdx"
+    OUTPUT_QUIET
+    ERROR_QUIET
+    WORKING_DIRECTORY ${NUMACTL_SOURCES_DIR}
+)
+
+ExternalProject_Add(numactl
+    PREFIX numactl
+    SOURCE_DIR ${NUMACTL_SOURCES_DIR}
+    BINARY_DIR ${NUMACTL_BINARY_DIR}
+    BUILD_IN_SOURCE 0
+    CONFIGURE_COMMAND cd <SOURCE_DIR> && sh autogen.sh
+    COMMAND cd <BINARY_DIR> && sh <SOURCE_DIR>/configure --prefix=${INSTALL_PATH} --enable-shared=no --enable-static=yes
+    BUILD_COMMAND $(MAKE)
+    INSTALL_COMMAND $(MAKE) install
+)
+
+# used by fs
+option(WITH_BOOST "Build boost library" ON)
+
+if (WITH_BOOST)
+    set(BOOST_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/boost)
+    set(BOOST_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/boost/build)
+
+    ExternalProject_Add(boost
+        SOURCE_DIR ${BOOST_SOURCES_DIR}
+        BINARY_DIR ${BOOST_BINARY_DIR}
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ${CMAKE_COMMAND} -B <BINARY_DIR> -S <SOURCE_DIR>
+            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR=${INSTALL_PATH}/lib
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+            -DBUILD_SHARED_LIBS=OFF
+            -DBUILD_TESTING=OFF
+            -DBOOST_RUNTIME_LINK=STATIC
+            -DBOOST_IOSTREAMS_ENABLE_ZLIB=ON
+            -DBOOST_IOSTREAMS_ENABLE_ZSTD=OFF
+            -DBOOST_IOSTREAMS_ENABLE_BZIP2=OFF
+            -DBOOST_IOSTREAMS_ENABLE_LZMA=OFF
+        INSTALL_COMMAND $(MAKE) install
+        BUILD_ALWAYS TRUE
+        DEPENDS zlib zstd
+    )
+endif()
+
+# used by fs
+# 3fs libusrbio
+option(WITH_LIBUSRBIO "Build 3fs usrbio library" ON)
+
+cmake_host_system_information(RESULT PRETTY_NAME QUERY DISTRIB_PRETTY_NAME)
+if (WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
+    if(NOT WITH_BOOST)
+        message(FATAL_ERROR "LIBUSRBIO requires BOOST,please enable by WITH_BOOST")
+    endif()
+
+    set(LIBUSRBIO_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libusrbio)
+    set(LIBUSRBIO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libusrbio/build)
+
+    execute_process(
+        # if patch is appled,next appled will failed,so we need to reset the git
+        COMMAND sh -c "git reset --hard && git clean -fd && \
+                       git submodule foreach --recursive 'git reset --hard && git clean -fd'"
+        OUTPUT_QUIET
+        ERROR_QUIET
+        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR}
+    )
+    message(STATUS "apply patch to 3fs usrbio")
+    execute_process(
+        COMMAND ./patches/apply.sh
+        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR}
+    )
+    # Preprocess 3fs makefile
+    execute_process(
+        COMMAND sed -i -E "/CodeCoverage.cmake|CLangFormat.cmake|CLangTidy.cmake|DumpConfig.cmake|Jemalloc.cmake|ApacheArrow.cmake/d" ${LIBUSRBIO_SOURCES_DIR}/CMakeLists.txt
+    )
+    file(WRITE "${LIBUSRBIO_SOURCES_DIR}/src/lib/api/CMakeLists.txt" [=[
+        target_add_lib(hf3fs_api client-lib-common storage-client numa rt)
+        add_library(usrbio STATIC
+            $<TARGET_OBJECTS:hf3fs_api>
+            $<TARGET_OBJECTS:client-lib-common>
+            $<TARGET_OBJECTS:core-user-fbs>
+            $<TARGET_OBJECTS:common>
+            $<TARGET_OBJECTS:fmt>
+            $<TARGET_OBJECTS:scn::scn>
+        )
+    ]=])
+
+    ExternalProject_Add(
+        libusrbio
+        SOURCE_DIR  ${LIBUSRBIO_SOURCES_DIR}
+        BINARY_DIR  ${LIBUSRBIO_BINARY_DIR}
+        CMAKE_ARGS
+            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+            -DCMAKE_CXX_COMPILER=clang++-14
+            -DCMAKE_C_COMPILER=clang-14
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${LIBUSRBIO_BINARY_DIR}/lib
+            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${LIBUSRBIO_BINARY_DIR}/lib
+            -DBOOST_LINK_STATIC=ON
+            -DBoost_USE_STATIC_RUNTIME=ON
+            # Using 3fs built-in libfmt-v10 library
+            -DCMAKE_CXX_FLAGS="-I${LIBUSRBIO_SOURCES_DIR}/third_party/fmt/include"
+        CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+        BUILD_COMMAND  ${CMAKE_COMMAND} --build ${LIBUSRBIO_BINARY_DIR} --target usrbio -j
+        # copy library to install path
+        COMMAND cp ${LIBUSRBIO_SOURCES_DIR}/src/lib/api/hf3fs_usrbio.h ${INSTALL_PATH}/include/
+        COMMAND cp ${LIBUSRBIO_BINARY_DIR}/lib/libfolly.a ${INSTALL_PATH}/lib/
+        COMMAND cp ${LIBUSRBIO_BINARY_DIR}/lib/libusrbio.a ${INSTALL_PATH}/lib/
+        INSTALL_COMMAND ""
+        BUILD_ALWAYS        TRUE
+        DEPENDS gflags glog double-conversion libevent numactl openssl boost
+    )
+
+endif()
+
+# used by fs
+set(RDMACORE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rdma-core)
+set(RDMACORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/rdma-core/build)
+
+ExternalProject_Add(rdma-core
+    PREFIX rdma-core
+    SOURCE_DIR ${RDMACORE_SOURCES_DIR}
+    BINARY_DIR ${RDMACORE_BINARY_DIR}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -GNinja -S <SOURCE_DIR> -B <BINARY_DIR>
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DENABLE_STATIC=ON
+        -DENABLE_VALGRIND=OFF
+        -DENABLE_RESOLVE_NEIGH=OFF
+        -DNO_MAN_PAGES=ON
+    BUILD_COMMAND ninja -C <BINARY_DIR>
+    # copy library to install path
+    COMMAND cp -RL <BINARY_DIR>/include/infiniband ${INSTALL_PATH}/include/
+    COMMAND cp -RL <BINARY_DIR>/include/rdma ${INSTALL_PATH}/include/
+    COMMAND cp <BINARY_DIR>/lib/librdmacm.a  ${INSTALL_PATH}/lib/
+    COMMAND cp <BINARY_DIR>/lib/libibverbs.a ${INSTALL_PATH}/lib/
+    COMMAND cp <BINARY_DIR>/lib/pkgconfig/libibverbs.pc ${INSTALL_PATH}/lib/pkgconfig
+    COMMAND cp <BINARY_DIR>/lib/pkgconfig/librdmacm.pc ${INSTALL_PATH}/lib/pkgconfig
+    INSTALL_COMMAND ""
+    BUILD_ALWAYS TRUE
+)
+
+# used by fs
+# ceph librados
+option(WITH_LIBRADOS "Build ceph rados library" ON)
+
+if (WITH_LIBRADOS)
+    if(NOT WITH_BOOST)
+        message(FATAL_ERROR "LIBRADOS requires BOOST,please enable by WITH_BOOST")
+    endif()
+
+    set(LIBRADOS_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/librados)
+    set(LIBRADOS_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/librados/build)
+
+    #reset ceph cmake file
+    execute_process(
+        COMMAND sh -c "git reset --hard && git clean -dfx && git submodule foreach --recursive 'git reset --hard && git clean -dfx'"
+        OUTPUT_QUIET
+        ERROR_QUIET
+        WORKING_DIRECTORY ${LIBRADOS_SOURCES_DIR}
+    )
+    # Preprocess ceph cmake file
+    file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
+        add_library(rados-static STATIC
+        librados_c.cc
+        librados_cxx.cc
+        ${ceph_common_objs}
+        $<TARGET_OBJECTS:crc32>
+        $<TARGET_OBJECTS:arch>
+        $<TARGET_OBJECTS:librados_impl>
+        $<TARGET_OBJECTS:osdc>
+        $<TARGET_OBJECTS:cls_lock_client>
+        $<TARGET_OBJECTS:json_spirit>
+        )
+    ]=])
+
+    ExternalProject_Add(librados
+        SOURCE_DIR ${LIBRADOS_SOURCES_DIR}
+        BINARY_DIR ${LIBRADOS_BINARY_DIR}
+        CONFIGURE_COMMAND ${CMAKE_COMMAND} -GNinja -S <SOURCE_DIR> -B <BINARY_DIR>
+            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DENABLE_GIT_VERSION=OFF
+            -DWITH_FUSE=OFF
+            -DWITH_RADOSGW_AMQP_ENDPOINT=OFF
+            -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF
+            -DWITH_BABELTRACE=OFF
+            -DWITH_SEASTAR=OFF
+            -DWITH_LIBCEPHFS=OFF
+            -DWITH_CEPHFS=OFF
+            -DWITH_MGR=OFF
+            -DWITH_RADOSGW=OFF
+            -DWITH_RBD=OFF
+            -DWITH_KRBD=OFF
+            -DWITH_TESTS=OFF
+            -DWITH_MANPAGE=OFF
+            -DENABLE_SHARED=OFF
+            -DWITH_STATIC_LIBSTDCXX=ON
+            -DWITH_LTTNG=OFF
+            -DWITH_SYSTEMD=OFF
+            -DWITH_JAEGER=OFF
+            -DWITH_OPENLDAP=OFF
+            -DWITH_BLKIN=OFF
+            -DWITH_LIBCEPHSQLITE=OFF
+            -DWITH_BLUESTORE=OFF
+            -DWITH_QATZIP=OFF
+            -DWITH_QATLIB=OFF
+            -DWITH_FMT_HEADER_ONLY=ON
+            -DWITH_SYSTEM_BOOST=ON
+            -DBoost_USE_STATIC_LIBS=ON
+            -DBoost_USE_STATIC_RUNTIME=ON
+            # Using ceph built-in libfmt-v9 library
+            -DCMAKE_CXX_FLAGS="-I<SOURCE_DIR>/src/fmt/include"
+            # OpenSSL configurations
+            -DOPENSSL_ROOT_DIR=${INSTALL_PATH}
+            -DOPENSSL_INCLUDE_DIR=${INSTALL_PATH}/include
+            -DOPENSSL_CRYPTO_LIBRARY=${INSTALL_PATH}/lib/libcrypto.a
+            -DOPENSSL_SSL_LIBRARY=${INSTALL_PATH}/lib/libssl.a
+            -DOPENSSL_LIBRARIES=${INSTALL_PATH}/lib/libcrypto.a;${INSTALL_PATH}/lib/libssl.a
+            -DOPENSSL_USE_STATIC_LIBS=ON
+        BUILD_COMMAND ninja -C <BINARY_DIR> rados-static
+        # copy library to install path
+        COMMAND cp -RL <SOURCE_DIR>/src/include/rados ${INSTALL_PATH}/include/
+        COMMAND cp <BINARY_DIR>/lib/librados-static.a ${INSTALL_PATH}/lib/librados.a
+        INSTALL_COMMAND ""
+        BUILD_ALWAYS TRUE
+        DEPENDS openssl boost rdma-core curl
+    )
+endif()

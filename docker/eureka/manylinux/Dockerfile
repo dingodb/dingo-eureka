@@ -9,8 +9,8 @@ COPY ../../.. .
 
 # Build and install
 RUN mkdir build && cd build && \
-    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBUSRBIO=OFF -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_TOML11=OFF -DWITH_LIBFUSE=OFF -DWITH_AWSSDKCPP=OFF .. && \
-    ulimit -n 65535 && make -j2 -k
+    cmake -DINSTALL_PATH=/root/.local/dingo-eureka .. && \
+    ulimit -n 65535 && make -j32 -k
 
 # Final stage
 FROM dingodatabase/dingo-base:manylinux_2_34
