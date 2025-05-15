@@ -120,4 +120,4 @@
 	url = https://github.com/ceph/ceph.git
 [submodule "toml11"]
 	path = toml11
-	url = git@github.com:ToruNiina/toml11.git
+	url = https://github.com/ToruNiina/toml11.git
