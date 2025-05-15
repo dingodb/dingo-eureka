@@ -32,7 +32,7 @@ sudo apt update
 sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip pkg-config
 sudo apt install -y meson ninja-build
 sudo apt install  gcc-12 g++-12 clang-14 libibverbs-dev #for usrbio
-sudo apt install -y libudev-dev libblkid-dev libkeyutils-dev libcap-dev && sudo pip3 install cython PyYAML #for ceph librados
+sudo apt install -y libudev-dev libblkid-dev libkeyutils-dev libcap-dev cython3 python3-yaml #for ceph librados
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
