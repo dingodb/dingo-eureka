@@ -1042,19 +1042,19 @@ if (WITH_LIBRADOS)
         WORKING_DIRECTORY ${LIBRADOS_SOURCES_DIR}
     )
     # Preprocess ceph cmake file
-    file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
-        add_library(rados-static STATIC
-        librados_c.cc
-        librados_cxx.cc
-        ${ceph_common_objs}
-        $<TARGET_OBJECTS:crc32>
-        $<TARGET_OBJECTS:arch>
-        $<TARGET_OBJECTS:librados_impl>
-        $<TARGET_OBJECTS:osdc>
-        $<TARGET_OBJECTS:cls_lock_client>
-        $<TARGET_OBJECTS:json_spirit>
-        )
-    ]=])
+    #file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
+    #    add_library(rados-static STATIC
+    #    librados_c.cc
+    #    librados_cxx.cc
+    #    ${ceph_common_objs}
+    #    $<TARGET_OBJECTS:crc32>
+    #    $<TARGET_OBJECTS:arch>
+    #    $<TARGET_OBJECTS:librados_impl>
+    #    $<TARGET_OBJECTS:osdc>
+    #    $<TARGET_OBJECTS:cls_lock_client>
+    #    $<TARGET_OBJECTS:json_spirit>
+    #    )
+    #]=])
 
     ExternalProject_Add(librados
         SOURCE_DIR ${LIBRADOS_SOURCES_DIR}
@@ -1105,7 +1105,17 @@ if (WITH_LIBRADOS)
         COMMAND cp -RL <SOURCE_DIR>/src/include/rados ${INSTALL_PATH}/include/
         COMMAND cp <BINARY_DIR>/lib/librados-static.a ${INSTALL_PATH}/lib/librados.a
         INSTALL_COMMAND ""
+        BUILD_BYPRODUCTS
+            ${INSTALL_PATH}/lib/librados.a
+            ${INSTALL_PATH}/include/rados
         BUILD_ALWAYS TRUE
         DEPENDS openssl boost rdma-core curl
     )
 endif()
+
+add_library(rados-static STATIC IMPORTED GLOBAL)
+set_target_properties(rados-static PROPERTIES
+    IMPORTED_LOCATION ${INSTALL_PATH}/lib/librados.a
+    INTERFACE_INCLUDE_DIRECTORIES ${INSTALL_PATH}/include
+)
+add_dependencies(rados-static librados)
