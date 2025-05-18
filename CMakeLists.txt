@@ -833,7 +833,7 @@ set(LIBFUSE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libfuse/build)
 
 option(WITH_LIBFUSE "Build fuse library" ON)
 
-if (NOT WITH_LIBFUSE)
+if (WITH_LIBFUSE)
     ExternalProject_Add(
         libfuse
         SOURCE_DIR          ${LIBFUSE_SOURCES_DIR}
@@ -1042,19 +1042,19 @@ if (WITH_LIBRADOS)
         WORKING_DIRECTORY ${LIBRADOS_SOURCES_DIR}
     )
     # Preprocess ceph cmake file
-    #file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
-    #    add_library(rados-static STATIC
-    #    librados_c.cc
-    #    librados_cxx.cc
-    #    ${ceph_common_objs}
-    #    $<TARGET_OBJECTS:crc32>
-    #    $<TARGET_OBJECTS:arch>
-    #    $<TARGET_OBJECTS:librados_impl>
-    #    $<TARGET_OBJECTS:osdc>
-    #    $<TARGET_OBJECTS:cls_lock_client>
-    #    $<TARGET_OBJECTS:json_spirit>
-    #    )
-    #]=])
+    file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
+        add_library(rados-static STATIC
+        librados_c.cc
+        librados_cxx.cc
+        ${ceph_common_objs}
+        $<TARGET_OBJECTS:crc32>
+        $<TARGET_OBJECTS:arch>
+        $<TARGET_OBJECTS:librados_impl>
+        $<TARGET_OBJECTS:osdc>
+        $<TARGET_OBJECTS:cls_lock_client>
+        $<TARGET_OBJECTS:json_spirit>
+        )
+    ]=])
 
     ExternalProject_Add(librados
         SOURCE_DIR ${LIBRADOS_SOURCES_DIR}
@@ -1113,9 +1113,9 @@ if (WITH_LIBRADOS)
     )
 endif()
 
-add_library(rados-static STATIC IMPORTED GLOBAL)
-set_target_properties(rados-static PROPERTIES
-    IMPORTED_LOCATION ${INSTALL_PATH}/lib/librados.a
-    INTERFACE_INCLUDE_DIRECTORIES ${INSTALL_PATH}/include
-)
-add_dependencies(rados-static librados)
+#add_library(rados-static STATIC IMPORTED GLOBAL)
+#set_target_properties(rados-static PROPERTIES
+#    IMPORTED_LOCATION ${INSTALL_PATH}/lib/librados.a
+#    INTERFACE_INCLUDE_DIRECTORIES ${INSTALL_PATH}/include
+#)
+#add_dependencies(rados-static librados)
