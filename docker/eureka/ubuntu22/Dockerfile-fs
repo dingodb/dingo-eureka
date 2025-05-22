@@ -1,5 +1,5 @@
 # Use the specified base image
-FROM dingodatabase/dingo-base:rocky9 AS builder
+FROM dingodatabase/dingo-base:ubuntu2204 AS builder
 
 # Create a working directory
 WORKDIR /dingo-eureka
@@ -9,7 +9,7 @@ COPY ../../.. .
 
 # Build and install dingo-eureka
 RUN mkdir build && cd build && \
-    cmake -DINSTALL_PATH=/root/.local/dingo-eureka .. && \
+    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_GRPC=OFF .. && \
     ulimit -n 65535 && make -j32 -k
 
 # Build and install dingo-sdk
@@ -20,7 +20,7 @@ RUN cd / && git clone https://github.com/dingodb/dingo-sdk.git && \
     make -j16 && make install 
 
 # Final stage
-FROM dingodatabase/dingo-base:rocky9
+FROM dingodatabase/dingo-base:ubuntu2204
 
 ENV THIRD_PARTY_INSTALL_PATH=/root/.local/dingo-eureka
 ENV DINGO_EUREKA_INSTALL_PATH=/root/.local/dingo-eureka

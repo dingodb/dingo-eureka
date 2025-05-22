@@ -305,80 +305,84 @@ ExternalProject_Add(protobuf
   DEPENDS absl utf8_range zlib jsoncpp
 )
 
-SET(GRPC_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/grpc)
+option(WITH_GRPC "Build grpc library" ON)
 
-# Builds c-ares project from the git submodule.
-ExternalProject_Add(c-ares
-  PREFIX c-ares
-  SOURCE_DIR "${GRPC_SOURCES_DIR}/third_party/cares/cares"
-  CMAKE_ARGS
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-  CMAKE_CACHE_ARGS
-        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
-        -DCARES_SHARED:BOOL=OFF
-        -DCARES_STATIC:BOOL=ON
-        -DCARES_STATIC_PIC:BOOL=ON
-        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
-        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-)
-
-# used by grpc
-# Builds re2 project from the git submodule.
-ExternalProject_Add(re2
-  PREFIX re2
-  SOURCE_DIR "${GRPC_SOURCES_DIR}/third_party/re2"
-  CMAKE_ARGS
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-  CMAKE_CACHE_ARGS
-        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
-        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
-        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-)
-
-# the location where protobuf-config.cmake will be installed varies by platform
-if (WIN32)
-  set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${INSTALL_PATH}/cmake")
-else()
-  set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${INSTALL_PATH}/lib/cmake/protobuf")
+if (WITH_GRPC)
+    SET(GRPC_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/grpc)
+    
+    # Builds c-ares project from the git submodule.
+    ExternalProject_Add(c-ares
+      PREFIX c-ares
+      SOURCE_DIR "${GRPC_SOURCES_DIR}/third_party/cares/cares"
+      CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
+            -DCARES_SHARED:BOOL=OFF
+            -DCARES_STATIC:BOOL=ON
+            -DCARES_STATIC_PIC:BOOL=ON
+            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+    )
+    
+    # used by grpc
+    # Builds re2 project from the git submodule.
+    ExternalProject_Add(re2
+      PREFIX re2
+      SOURCE_DIR "${GRPC_SOURCES_DIR}/third_party/re2"
+      CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
+            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+    )
+    
+    # the location where protobuf-config.cmake will be installed varies by platform
+    if (WIN32)
+      set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${INSTALL_PATH}/cmake")
+    else()
+      set(_FINDPACKAGE_PROTOBUF_CONFIG_DIR "${INSTALL_PATH}/lib/cmake/protobuf")
+    endif()
+    
+    # if OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
+    # set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
+    # if (OPENSSL_ROOT_DIR)
+    #   set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
+    # endif()
+    
+    # used by sdk
+    # Builds gRPC based on locally checked-out sources and set arguments so that all the dependencies
+    # are correctly located.
+    ExternalProject_Add(grpc
+      PREFIX grpc
+      SOURCE_DIR "${GRPC_SOURCES_DIR}"
+      CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DOPENSSL_USE_STATIC_LIBS=TRUE
+      CMAKE_CACHE_ARGS
+            -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
+            -DgRPC_INSTALL:BOOL=ON
+            -DgRPC_BUILD_TESTS:BOOL=OFF
+            -DgRPC_BUILD_MSVC_MP_COUNT:STRING=-1
+            -Dutf8_range_DIR:STRING=${INSTALL_PATH}/lib/cmake/utf8_range
+            -DgRPC_PROTOBUF_PROVIDER:STRING=package
+            -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
+            -DgRPC_RE2_PROVIDER:STRING=package
+            -Dre2_DIR:STRING=${INSTALL_PATH}/lib/cmake/re2
+            -DgRPC_ZLIB_PROVIDER:STRING=package
+            -DZLIB_ROOT:STRING=${INSTALL_PATH}
+            -DgRPC_ABSL_PROVIDER:STRING=package
+            -Dabsl_DIR:STRING=${INSTALL_PATH}/lib/cmake/absl
+            -DgRPC_CARES_PROVIDER:STRING=package
+            -Dc-ares_DIR:PATH=${INSTALL_PATH}/lib/cmake/c-ares
+            -DgRPC_SSL_PROVIDER:STRING=package
+            -DOPENSSL_ROOT_DIR:PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+            -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+      DEPENDS c-ares protobuf re2 zlib absl openssl
+    )
 endif()
-
-# if OPENSSL_ROOT_DIR is set, propagate that hint path to the external projects with OpenSSL dependency.
-# set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "")
-# if (OPENSSL_ROOT_DIR)
-#   set(_CMAKE_ARGS_OPENSSL_ROOT_DIR "-DOPENSSL_ROOT_DIR:PATH=${OPENSSL_ROOT_DIR}")
-# endif()
-
-# used by sdk
-# Builds gRPC based on locally checked-out sources and set arguments so that all the dependencies
-# are correctly located.
-ExternalProject_Add(grpc
-  PREFIX grpc
-  SOURCE_DIR "${GRPC_SOURCES_DIR}"
-  CMAKE_ARGS
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DOPENSSL_USE_STATIC_LIBS=TRUE
-  CMAKE_CACHE_ARGS
-        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
-        -DgRPC_INSTALL:BOOL=ON
-        -DgRPC_BUILD_TESTS:BOOL=OFF
-        -DgRPC_BUILD_MSVC_MP_COUNT:STRING=-1
-        -Dutf8_range_DIR:STRING=${INSTALL_PATH}/lib/cmake/utf8_range
-        -DgRPC_PROTOBUF_PROVIDER:STRING=package
-        -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
-        -DgRPC_RE2_PROVIDER:STRING=package
-        -Dre2_DIR:STRING=${INSTALL_PATH}/lib/cmake/re2
-        -DgRPC_ZLIB_PROVIDER:STRING=package
-        -DZLIB_ROOT:STRING=${INSTALL_PATH}
-        -DgRPC_ABSL_PROVIDER:STRING=package
-        -Dabsl_DIR:STRING=${INSTALL_PATH}/lib/cmake/absl
-        -DgRPC_CARES_PROVIDER:STRING=package
-        -Dc-ares_DIR:PATH=${INSTALL_PATH}/lib/cmake/c-ares
-        -DgRPC_SSL_PROVIDER:STRING=package
-        -DOPENSSL_ROOT_DIR:PATH=${INSTALL_PATH}
-        -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
-        -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-  DEPENDS c-ares protobuf re2 zlib absl openssl
-)
 
 # use by brpc/rocksdb
 ExternalProject_Add(snappy
