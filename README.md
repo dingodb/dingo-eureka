@@ -22,8 +22,8 @@ sudo cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ &&   sudo cp -rf  cm
 
 source /opt/rh/gcc-toolset-13/enable
 sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch autoconf automake libtool python3-pip pkgconfig
-sudo dnf --enablerepo=crb install -y meson ninja-build
-sudo dnf install -y systemd-devel libblkid keyutils-libs-devel libcap-devel cython  python3-pyyaml  #for ceph librados
+sudo dnf install -y meson ninja-build
+sudo dnf install -y systemd-devel libblkid keyutils-libs-devel libcap-devel python3-Cython  python3-pyyaml  #for ceph librados
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
