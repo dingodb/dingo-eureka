@@ -857,7 +857,7 @@ if (WITH_LIBFUSE)
                              -Dsysconfdir=${INSTALL_PATH}/include/fuse3/etc
         BUILD_COMMAND       meson compile -C ${LIBFUSE_BINARY_DIR}
         INSTALL_COMMAND     meson install -C ${LIBFUSE_BINARY_DIR}
-        BUILD_ALWAYS        TRUE
+        BUILD_ALWAYS        FALSE
     )
 endif()
 
@@ -924,7 +924,7 @@ if (WITH_BOOST)
             -DBOOST_IOSTREAMS_ENABLE_BZIP2=OFF
             -DBOOST_IOSTREAMS_ENABLE_LZMA=OFF
         INSTALL_COMMAND $(MAKE) install
-        BUILD_ALWAYS TRUE
+        BUILD_ALWAYS FALSE
         DEPENDS zlib zstd
     )
 endif()
@@ -994,7 +994,7 @@ if (WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
         COMMAND cp ${LIBUSRBIO_BINARY_DIR}/lib/libfolly.a ${INSTALL_PATH}/lib/
         COMMAND cp ${LIBUSRBIO_BINARY_DIR}/lib/libusrbio.a ${INSTALL_PATH}/lib/
         INSTALL_COMMAND ""
-        BUILD_ALWAYS        TRUE
+        BUILD_ALWAYS        FALSE
         DEPENDS gflags glog double-conversion libevent numactl openssl boost
     )
 
@@ -1026,7 +1026,7 @@ if (WITH_RDMACORE)
         COMMAND cp <BINARY_DIR>/lib/pkgconfig/libibverbs.pc ${INSTALL_PATH}/lib/pkgconfig
         COMMAND cp <BINARY_DIR>/lib/pkgconfig/librdmacm.pc ${INSTALL_PATH}/lib/pkgconfig
         INSTALL_COMMAND ""
-        BUILD_ALWAYS TRUE
+        BUILD_ALWAYS FALSE
     )
 endif()
 
@@ -1116,7 +1116,7 @@ if (WITH_LIBRADOS)
         BUILD_BYPRODUCTS
             ${INSTALL_PATH}/lib/librados.a
             ${INSTALL_PATH}/include/rados
-        BUILD_ALWAYS TRUE
+        BUILD_ALWAYS FALSE
         DEPENDS openssl boost rdma-core curl
     )
 endif()
