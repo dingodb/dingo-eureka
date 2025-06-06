@@ -18,9 +18,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set Safe Dir
-      run: git config --global --add safe.directory $PWD
-
     - name: Record event type
       run: |
         if [ "${{ github.event_name }}" == "pull_request" ]; then
@@ -37,14 +34,43 @@ jobs:
           fi
         fi
 
-    - name: Sync submodules
+    - name: Copy dingo-eureka repository
       run: |
+        echo "Move dingo-eureka repository"
+        sudo cp -r /home/runner/work/dingo-eureka/dingo-eureka /mnt/
+        sudo chown -R $USER:$USER /mnt/dingo-eureka
+
+    - name: Set Safe Dir
+      run: git config --global --add safe.directory /mnt/dingo-eureka
+    
+    - name: Configure Docker data-root
+      run: |
+        sudo systemctl stop docker
+        sudo systemctl stop docker.socket
+        sudo mkdir -p /mnt/docker
+        echo '{ "data-root": "/mnt/docker" }' | sudo tee /etc/docker/daemon.json
+        if [ -d /var/lib/docker ]; then
+          sudo mv /var/lib/docker /mnt/docker || true
+        fi
+        sudo systemctl start docker.socket
+        sudo systemctl start docker
+        docker info | grep "Docker Root Dir"
+
+    - name: Sync submodules
+      if: ${{ github.event_name == 'push'}}
+      run: |
+        cd /mnt/dingo-eureka
         git submodule sync --recursive
         git submodule update --init --recursive
 
     - name: Clean .git directory
       run: |
-        find . -name ".git" -type d -exec rm -rf {} +
+        find /mnt/dingo-eureka -name ".git" -type d -exec rm -rf {} +
+
+    - name: Pull dingodatabase/dingo-base:rocky9
+      if: ${{ github.event_name == 'push'}}
+      run: |
+        docker pull dingodatabase/dingo-eureka:rocky9
 
     - name: Set up Docker Buildx
       if: ${{ github.event_name == 'push'}}
@@ -57,23 +83,12 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Docker meta
-      if: ${{ github.event_name == 'push'}}
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: dingodatabase/dingo-eureka
-        tags: |
-          type=raw,enable=${{ env.EVENT_TYPE == 'TAG' }},value=${{ env.TAG_NAME }}
-          type=raw,value=latest,enable={{is_default_branch}}
-          type=sha,prefix=,format=long
-
-    - name: Build and push
+    - name: Build and push 'dingo-eureka:rocky9-fs'
       if: ${{ github.event_name == 'push'}}
       uses: docker/build-push-action@v6
       with:
-        context: .
-        file: ./docker/eureka/rocky9/Dockerfile
+        context: /mnt/dingo-eureka
+        file: /mnt/dingo-eureka/docker/eureka/rocky9/Dockerfile-fs
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: rocky9-fs
   
