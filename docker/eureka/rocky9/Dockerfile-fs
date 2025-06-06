@@ -10,7 +10,7 @@ COPY ../../.. .
 # Build and install dingo-eureka
 RUN mkdir build && cd build && \
     cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_GRPC=OFF .. && \
-    ulimit -n 65535 && make -j32 -k
+    ulimit -n 65535 && make -j $(nproc) -k
 
 # Final stage
 FROM dingodatabase/dingo-base:rocky9

@@ -22,6 +22,7 @@ jobs:
       run: |
         if [ "${{ github.event_name }}" == "pull_request" ]; then
           echo "EVENT_TYPE=PR" >> $GITHUB_ENV
+          echo "Skipping build steps for pull request event"
         elif [ "${{ github.event_name }}" == "push" ]; then
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             echo "EVENT_TYPE=TAG" >> $GITHUB_ENV
@@ -35,15 +36,18 @@ jobs:
         fi
 
     - name: Copy dingo-eureka repository
+      if: ${{ github.event_name == 'push'}}
       run: |
         echo "Move dingo-eureka repository"
         sudo cp -r /home/runner/work/dingo-eureka/dingo-eureka /mnt/
         sudo chown -R $USER:$USER /mnt/dingo-eureka
 
     - name: Set Safe Dir
+      if: ${{ github.event_name == 'push'}}
       run: git config --global --add safe.directory /mnt/dingo-eureka
     
     - name: Configure Docker data-root
+      if: ${{ github.event_name == 'push'}}
       run: |
         sudo systemctl stop docker
         sudo systemctl stop docker.socket
@@ -64,13 +68,14 @@ jobs:
         git submodule update --init --recursive
 
     - name: Clean .git directory
+      if: ${{ github.event_name == 'push'}}
       run: |
         find /mnt/dingo-eureka -name ".git" -type d -exec rm -rf {} +
 
-    - name: Pull dingodatabase/dingo-base:rocky9
+    - name: Pull dingo-base:rocky9
       if: ${{ github.event_name == 'push'}}
       run: |
-        docker pull dingodatabase/dingo-eureka:rocky9
+        docker pull dingodatabase/dingo-base:rocky9
 
     - name: Set up Docker Buildx
       if: ${{ github.event_name == 'push'}}
@@ -89,6 +94,6 @@ jobs:
       with:
         context: /mnt/dingo-eureka
         file: /mnt/dingo-eureka/docker/eureka/rocky9/Dockerfile-fs
-        push: true
+        push: ${{ github.event_name == 'push'}}
         tags: rocky9-fs
   
