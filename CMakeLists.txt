@@ -1051,17 +1051,19 @@ if (WITH_LIBRADOS)
     )
     # Preprocess ceph cmake file
     file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
-        add_library(rados-static STATIC
-        librados_c.cc
-        librados_cxx.cc
-        ${ceph_common_objs}
-        $<TARGET_OBJECTS:crc32>
-        $<TARGET_OBJECTS:arch>
-        $<TARGET_OBJECTS:librados_impl>
-        $<TARGET_OBJECTS:osdc>
-        $<TARGET_OBJECTS:cls_lock_client>
-        $<TARGET_OBJECTS:json_spirit>
-        )
+        if (NOT TARGET rados-static)
+            add_library(rados-static STATIC
+            librados_c.cc
+            librados_cxx.cc
+            ${ceph_common_objs}
+            $<TARGET_OBJECTS:crc32>
+            $<TARGET_OBJECTS:arch>
+            $<TARGET_OBJECTS:librados_impl>
+            $<TARGET_OBJECTS:osdc>
+            $<TARGET_OBJECTS:cls_lock_client>
+            $<TARGET_OBJECTS:json_spirit>
+            )
+        endif()
     ]=])
 
     ExternalProject_Add(librados
@@ -1120,10 +1122,3 @@ if (WITH_LIBRADOS)
         DEPENDS openssl boost rdma-core curl
     )
 endif()
-
-#add_library(rados-static STATIC IMPORTED GLOBAL)
-#set_target_properties(rados-static PROPERTIES
-#    IMPORTED_LOCATION ${INSTALL_PATH}/lib/librados.a
-#    INTERFACE_INCLUDE_DIRECTORIES ${INSTALL_PATH}/include
-#)
-#add_dependencies(rados-static librados)

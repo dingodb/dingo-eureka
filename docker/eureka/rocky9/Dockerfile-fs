@@ -12,21 +12,11 @@ RUN mkdir build && cd build && \
     cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_GRPC=OFF .. && \
     ulimit -n 65535 && make -j32 -k
 
-# Build and install dingo-sdk
-RUN cd / && git clone https://github.com/dingodb/dingo-sdk.git && \
-    cd dingo-sdk && \
-    git submodule sync --recursive && git submodule update --init --recursive && \
-    mkdir build && cd build && cmake -DTHIRD_PARTY_INSTALL_PATH=/root/.local/dingo-eureka -DCMAKE_INSTALL_PREFIX=/root/.local/dingo-sdk -DBUILD_SDK_EXAMPLE=OFF  -DBUILD_BENCHMARK=OFF -DBUILD_PYTHON_SDK=OFF -DBUILD_INTEGRATION_TESTS=OFF -DBUILD_UNIT_TESTS=OFF .. && \
-    make -j16 && make install 
-
 # Final stage
 FROM dingodatabase/dingo-base:rocky9
 
 ENV THIRD_PARTY_INSTALL_PATH=/root/.local/dingo-eureka
 ENV DINGO_EUREKA_INSTALL_PATH=/root/.local/dingo-eureka
-ENV DINGOSDK_INSTALL_PATH=/root/.local/dingo-sdk
 
 # Copy installed files from builder
 COPY --from=builder /root/.local/dingo-eureka /root/.local/dingo-eureka
-COPY --from=builder /root/.local/dingo-sdk /root/.local/dingo-sdk
-
