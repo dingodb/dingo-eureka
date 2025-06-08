@@ -88,12 +88,21 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Docker meta of rocky9-fs
+      if: ${{ github.event_name == 'push'}}
+      id: rocky9-fs-meta
+      uses: docker/metadata-action@v5
+      with:
+        images: dingodatabase/dingo-eureka
+        tags: |
+          type=raw,value=rocky9-fs,enable=${{ github.ref_name == 'main' }}
+
     - name: Build and push 'dingo-eureka:rocky9-fs'
       if: ${{ github.event_name == 'push'}}
       uses: docker/build-push-action@v6
       with:
         context: /mnt/dingo-eureka
         file: /mnt/dingo-eureka/docker/eureka/rocky9/Dockerfile-fs
-        push: ${{ github.event_name == 'push'}}
-        tags: rocky9-fs
+        push: true
+        tags: ${{ steps.rocky9-fs-meta.outputs.tags }}
   
