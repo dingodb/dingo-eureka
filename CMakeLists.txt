@@ -15,11 +15,29 @@
 cmake_minimum_required(VERSION 3.23.1 FATAL_ERROR)
 project(dingo-eureka C CXX)
 
+# dingo-eureka version
+set(DINGOEUREKA_VERSION 1.0)
+
 # third-party install path
 if(NOT INSTALL_PATH)
     set(INSTALL_PATH "$ENV{HOME}/.local/dingo-eureka")
 endif()
 message("INSTALL_PATH:${INSTALL_PATH}")
+
+# generated version file
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/dingoEurekaConfigVersion.cmake.in
+    ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake
+    @ONLY
+)
+file(WRITE ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfig.cmake "#This file is mainly used to search dingo-eureka by find_package, do not delete it") 
+# copy dingo-eureka cmake version file
+file(COPY 
+    ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfig.cmake
+    ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake
+    DESTINATION ${INSTALL_PATH}/cmake
+)
+message(STATUS "dingo-eureka cmake version file: ${INSTALL_PATH}/cmake/dingoEurekaConfigVersion.cmake")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo")
