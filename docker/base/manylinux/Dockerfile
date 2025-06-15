@@ -1,8 +1,5 @@
 FROM quay.io/pypa/manylinux_2_34_x86_64:latest
 
-ARG http_proxy=http://172.20.3.88:1088
-ARG https_proxy=http://172.20.3.88:1088
-
 ENV TZ=Asia/Shanghai
 
 SHELL ["/bin/bash", "-c"]
