@@ -12,24 +12,15 @@ libfuse compilation requires Meson and Ninja:
 
 ```sh
 sudo dnf install -y epel-release && sudo crb enable
-sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch autoconf automake libtool python3-pip pkgconfig
+sudo dnf install -y wget tar git 'gcc-toolset-13*' perl flex bison patch autoconf automake libtool python3-pip pkgconfig libblkid-devel
 sudo dnf install -y meson ninja-build
-sudo dnf install -y systemd-devel libblkid keyutils-libs-devel libcap-devel cython  python3-pyyaml  #for ceph librados
+#for ceph librados
+sudo dnf install -y systemd-devel libblkid keyutils-libs-devel libcap-devel python3-pyyaml
+python3 -m pip install cython
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
-sudo cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ &&   sudo cp -rf  cmake-3.30.1-linux-x86_64/share/* /usr/local/share && rm -rf cmake-3.30.1-linux-x86_64
-
-source /opt/rh/gcc-toolset-13/enable
-sudo dnf install -y wget tar git gcc-toolset-13* perl flex bison patch autoconf automake libtool python3-pip pkgconfig
-sudo dnf install -y meson ninja-build
-sudo dnf install -y systemd-devel libblkid keyutils-libs-devel libcap-devel python3-Cython  python3-pyyaml  #for ceph librados
-
-wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
-tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
-sudo cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ &&   sudo cp -rf  cmake-3.30.1-linux-x86_64/share/* /usr/local/share && rm -rf cmake-3.30.1-linux-x86_64
-
-source /opt/rh/gcc-toolset-13/enable
+sudo cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ &&  sudo cp -rf  cmake-3.30.1-linux-x86_64/share/* /usr/local/share && rm -rf cmake-3.30.1-linux-x86_64
 ```
 
 ### Ubuntu 22.04/24.04
@@ -40,8 +31,10 @@ In Ubuntu, /bin/sh points to /bin/dash by default. We need to use /bin/bash as d
 sudo apt update
 sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip pkg-config
 sudo apt install -y meson ninja-build
-sudo apt install  gcc-12 g++-12 clang-14 libibverbs-dev #for usrbio
-sudo apt install -y libudev-dev libblkid-dev libkeyutils-dev libcap-dev cython3 python3-yaml #for ceph librados
+#for usrbio
+sudo apt install  gcc-12 g++-12 clang-14 libibverbs-dev
+#for ceph librados
+sudo apt install -y libudev-dev libblkid-dev libkeyutils-dev libcap-dev cython3 python3-yaml 
 
 wget https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz
 tar zxvf cmake-3.30.1-linux-x86_64.tar.gz
@@ -66,21 +59,17 @@ The default install path is ~/.local/dingo-eureka, if you want to use custome in
 In the source dir
 
 ```shell
-mkdir build && cd build
+cmake -S . -B build -DINSTALL_PATH=you-path
 
-cmake -DINSTALL_PATH=you-path ..
-
-make -j 32
+cmake --build build -j 32 --verbose
 ```
 
 use default install path to build and install
 
 ```shell
-mkdir build && cd build
+cmake -S . -B build
 
-cmake ..
-
-make -j 32
+cmake --build build -j 32 --verbose
 ```
 
 disable rados library build
