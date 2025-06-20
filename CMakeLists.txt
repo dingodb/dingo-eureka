@@ -24,6 +24,20 @@ if(NOT INSTALL_PATH)
 endif()
 message("INSTALL_PATH:${INSTALL_PATH}")
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+endif()
+message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX "d.a")
+endif()
+
+file(MAKE_DIRECTORY "${INSTALL_PATH}/lib")
+
+set(NINJA_JOBS 8 CACHE STRING "Number of jobs to run in parallel when building with ninja")
+message("Number of jobs to run in parallel when building with ninja: ${NINJA_JOBS}")
+
 # generated version file
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/dingoEurekaConfigVersion.cmake.in
@@ -38,17 +52,6 @@ file(COPY
     DESTINATION ${INSTALL_PATH}/cmake
 )
 message(STATUS "dingo-eureka cmake version file: ${INSTALL_PATH}/cmake/dingoEurekaConfigVersion.cmake")
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-endif()
-message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-
-if(CMAKE_BUILD_TYPE MATCHES "Debug")
-  set(CMAKE_STATIC_LIBRARY_SUFFIX "d.a")
-endif()
-
-file(MAKE_DIRECTORY "${INSTALL_PATH}/lib")
 
 include(ExternalProject)
 
@@ -1037,7 +1040,7 @@ if (WITH_RDMACORE)
             -DENABLE_VALGRIND=OFF
             -DENABLE_RESOLVE_NEIGH=OFF
             -DNO_MAN_PAGES=ON
-        BUILD_COMMAND ninja -C <BINARY_DIR>
+        BUILD_COMMAND ninja -C <BINARY_DIR> -v -j ${NINJA_JOBS}
         # copy library to install path
         COMMAND cp -RL <BINARY_DIR>/include/infiniband ${INSTALL_PATH}/include/
         COMMAND cp -RL <BINARY_DIR>/include/rdma ${INSTALL_PATH}/include/
@@ -1131,7 +1134,7 @@ if (WITH_LIBRADOS)
             -DOPENSSL_SSL_LIBRARY=${INSTALL_PATH}/lib/libssl.a
             -DOPENSSL_LIBRARIES=${INSTALL_PATH}/lib/libcrypto.a;${INSTALL_PATH}/lib/libssl.a
             -DOPENSSL_USE_STATIC_LIBS=ON
-        BUILD_COMMAND ninja -C <BINARY_DIR> rados-static
+        BUILD_COMMAND ninja -C <BINARY_DIR> rados-static -v -j ${NINJA_JOBS}
         # copy library to install path
         COMMAND cp -RL <SOURCE_DIR>/src/include/rados ${INSTALL_PATH}/include/
         COMMAND cp <BINARY_DIR>/lib/librados-static.a ${INSTALL_PATH}/lib/librados.a
