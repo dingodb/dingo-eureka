@@ -46,7 +46,6 @@ sudo cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ && sudo cp -rf  cmak
 ### Download the Submodule
 
 In the source dir
-
 ```shell
 git submodule sync --recursive
 
@@ -60,6 +59,17 @@ In the source dir
 
 ```shell
 cmake -S . -B build -DINSTALL_PATH=you-path
+
+cmake --build build -j 32 --verbose
+```
+
+There some lib build by ninja, and it's parrallel jobs not contorl by `cmake -j 32` or `make -j`
+we can change it's s parrallel jobs in cmake configure phase, use `-DNINJA_JOBS=N`, the default is 8
+
+for example
+
+```shell
+cmake -S . -B build -DNINJA_JOBS=16
 
 cmake --build build -j 32 --verbose
 ```
