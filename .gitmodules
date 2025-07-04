@@ -110,7 +110,7 @@
 	path = boost
 	url = https://github.com/boostorg/boost.git
 [submodule "libusrbio"]
-	path = libusrbio
+	path = src/libusrbio
 	url = https://github.com/deepseek-ai/3fs
 [submodule "rdma-core"]
 	path = rdma-core

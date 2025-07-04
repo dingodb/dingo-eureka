@@ -962,22 +962,35 @@ if (WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
         message(FATAL_ERROR "LIBUSRBIO requires BOOST,please enable by WITH_BOOST")
     endif()
 
-    set(LIBUSRBIO_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libusrbio)
-    set(LIBUSRBIO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libusrbio/build)
+    set(LIBUSRBIO_ORI_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libusrbio)
 
-    execute_process(
-        # if patch is appled,next appled will failed,so we need to reset the git
-        COMMAND sh -c "git reset --hard && git clean -fd && \
-                       git submodule foreach --recursive 'git reset --hard && git clean -fd'"
-        OUTPUT_QUIET
-        ERROR_QUIET
-        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR}
-    )
+    set(LIBUSRBIO_SOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/libusrbio)
+    set(LIBUSRBIO_BINARY_DIR ${LIBUSRBIO_SOURCES_DIR}/build)
+
     message(STATUS "apply patch to 3fs usrbio")
     execute_process(
         COMMAND ./patches/apply.sh
-        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR}
+        WORKING_DIRECTORY ${LIBUSRBIO_ORI_SOURCES_DIR}
     )
+
+    file(WRITE ${LIBUSRBIO_SOURCES_DIR}/copy_repo.sh
+        "mkdir -p ${LIBUSRBIO_BINARY_DIR} && \
+        rsync -a ${LIBUSRBIO_ORI_SOURCES_DIR}/. ${LIBUSRBIO_SOURCES_DIR}/")
+
+    message(STATUS "copy libusrbio repo to build dir")
+    execute_process(COMMAND sh ${LIBUSRBIO_SOURCES_DIR}/copy_repo.sh)
+
+    execute_process(
+        # 重置 folly 子模块
+        COMMAND git -C ${LIBUSRBIO_ORI_SOURCES_DIR}/third_party/folly reset --hard
+        COMMAND git -C ${LIBUSRBIO_ORI_SOURCES_DIR}/third_party/folly clean -fd
+
+        # 重置 rocksdb 子模块
+        COMMAND git -C ${LIBUSRBIO_ORI_SOURCES_DIR}/third_party/rocksdb reset --hard
+        COMMAND git -C ${LIBUSRBIO_ORI_SOURCES_DIR}/third_party/rocksdb clean -fd
+        WORKING_DIRECTORY ${LIBUSRBIO_ORI_SOURCES_DIR}
+    )
+
     # Preprocess 3fs makefile
     execute_process(
         COMMAND sed -i -E "/CodeCoverage.cmake|CLangFormat.cmake|CLangTidy.cmake|DumpConfig.cmake|Jemalloc.cmake|ApacheArrow.cmake/d" ${LIBUSRBIO_SOURCES_DIR}/CMakeLists.txt
