@@ -82,6 +82,17 @@ cmake -S . -B build
 cmake --build build -j 32 --verbose
 ```
 
+generate dingo-eureka package
+
+```shell
+cmake -S . -B build -DINSTALL_PATH=/opt/dingo-eureka -DENABLE_PACKAGE=ON -DPACKAGE_OUTPUT_PATH=/opt/packages
+
+cmake --build build -j 32 --verbose
+
+cd build && cpack
+``` 
+**Note:** The install path on the target server must also be /opt/dingo-eureka.
+
 disable rados library build
 
 ```shell
