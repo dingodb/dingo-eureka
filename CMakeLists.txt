@@ -24,6 +24,11 @@ if(NOT INSTALL_PATH)
 endif()
 message("INSTALL_PATH:${INSTALL_PATH}")
 
+option(ENABLE_PACKAGE "Enable package generation" OFF)
+if(ENABLE_PACKAGE)
+  include(cmake/package.cmake)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
