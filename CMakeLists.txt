@@ -555,6 +555,7 @@ ExternalProject_Add(rocksdb
         -DWITH_TOOLS=OFF
         -DWITH_TRACE_TOOLS=OFF
         -DPORTABLE=haswell
+        -DUSE_RTTI=ON
     CMAKE_CACHE_ARGS
         -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE
         -DZLIB_ROOT:STRING=${INSTALL_PATH}
