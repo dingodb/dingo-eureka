@@ -120,7 +120,7 @@ cmake -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_LIBUSRBIO=OFF ..
 | snappy            | main          |
 | leveldb           | main          |
 | brpc              | 1.12.1        |
-| rocksdb           | v9.8.4        |
+| rocksdb           | v10.2.1       |
 | incbin            | main          |
 | libfiu            | master        |
 | c4c32c            | main          |
