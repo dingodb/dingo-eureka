@@ -967,12 +967,6 @@ if (WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
     set(LIBUSRBIO_SOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/libusrbio)
     set(LIBUSRBIO_BINARY_DIR ${LIBUSRBIO_SOURCES_DIR}/build)
 
-    message(STATUS "apply patch to 3fs usrbio")
-    execute_process(
-        COMMAND ./patches/apply.sh
-        WORKING_DIRECTORY ${LIBUSRBIO_ORI_SOURCES_DIR}
-    )
-
     file(WRITE ${LIBUSRBIO_SOURCES_DIR}/copy_repo.sh
         "mkdir -p ${LIBUSRBIO_BINARY_DIR} && \
         rsync -a ${LIBUSRBIO_ORI_SOURCES_DIR}/. ${LIBUSRBIO_SOURCES_DIR}/")
@@ -980,15 +974,10 @@ if (WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
     message(STATUS "copy libusrbio repo to build dir")
     execute_process(COMMAND sh ${LIBUSRBIO_SOURCES_DIR}/copy_repo.sh)
 
+    message(STATUS "apply patch to 3fs usrbio")
     execute_process(
-        # 重置 folly 子模块
-        COMMAND git -C ${LIBUSRBIO_ORI_SOURCES_DIR}/third_party/folly reset --hard
-        COMMAND git -C ${LIBUSRBIO_ORI_SOURCES_DIR}/third_party/folly clean -fd
-
-        # 重置 rocksdb 子模块
-        COMMAND git -C ${LIBUSRBIO_ORI_SOURCES_DIR}/third_party/rocksdb reset --hard
-        COMMAND git -C ${LIBUSRBIO_ORI_SOURCES_DIR}/third_party/rocksdb clean -fd
-        WORKING_DIRECTORY ${LIBUSRBIO_ORI_SOURCES_DIR}
+        COMMAND ./patches/apply.sh
+        WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR}
     )
 
     # Preprocess 3fs makefile
