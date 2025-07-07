@@ -985,23 +985,6 @@ if (WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
         COMMAND ./patches/apply.sh
         WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR}
     )
-
-    # Preprocess 3fs makefile
-    execute_process(
-        COMMAND sed -i -E "/CodeCoverage.cmake|CLangFormat.cmake|CLangTidy.cmake|DumpConfig.cmake|Jemalloc.cmake|ApacheArrow.cmake/d" ${LIBUSRBIO_SOURCES_DIR}/CMakeLists.txt
-    )
-    file(WRITE "${LIBUSRBIO_SOURCES_DIR}/src/lib/api/CMakeLists.txt" [=[
-        target_add_lib(hf3fs_api client-lib-common storage-client numa rt)
-        add_library(usrbio STATIC
-            $<TARGET_OBJECTS:hf3fs_api>
-            $<TARGET_OBJECTS:client-lib-common>
-            $<TARGET_OBJECTS:core-user-fbs>
-            $<TARGET_OBJECTS:common>
-            $<TARGET_OBJECTS:fmt>
-            $<TARGET_OBJECTS:scn::scn>
-        )
-    ]=])
-
     ExternalProject_Add(
         libusrbio
         SOURCE_DIR  ${LIBUSRBIO_SOURCES_DIR}
@@ -1070,33 +1053,8 @@ if (WITH_LIBRADOS)
         message(FATAL_ERROR "LIBRADOS requires BOOST,please enable by WITH_BOOST")
     endif()
 
-    set(LIBRADOS_ORI_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/librados)
-
-    set(LIBRADOS_SOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/librados)
-    set(LIBRADOS_BINARY_DIR ${LIBRADOS_SOURCES_DIR}/build)
-
-    file(WRITE ${LIBRADOS_SOURCES_DIR}/copy_repo.sh
-     "mkdir -p ${LIBRADOS_BINARY_DIR} && cp -rf ${LIBRADOS_ORI_SOURCES_DIR}/* ${LIBRADOS_SOURCES_DIR}/")
-
-    message(STATUS "copy ceph librados repo to build dir")
-    execute_process(COMMAND sh ${LIBRADOS_SOURCES_DIR}/copy_repo.sh)
-
-    # Preprocess ceph cmake file
-    file(APPEND "${LIBRADOS_SOURCES_DIR}/src/librados/CMakeLists.txt" [=[
-        if (NOT TARGET rados-static)
-            add_library(rados-static STATIC
-            librados_c.cc
-            librados_cxx.cc
-            ${ceph_common_objs}
-            $<TARGET_OBJECTS:crc32>
-            $<TARGET_OBJECTS:arch>
-            $<TARGET_OBJECTS:librados_impl>
-            $<TARGET_OBJECTS:osdc>
-            $<TARGET_OBJECTS:cls_lock_client>
-            $<TARGET_OBJECTS:json_spirit>
-            )
-        endif()
-    ]=])
+    set(LIBRADOS_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/librados)
+    set(LIBRADOS_BINARY_DIR  ${CMAKE_CURRENT_BINARY_DIR}/librados/build)
 
     ExternalProject_Add(librados
         SOURCE_DIR ${LIBRADOS_SOURCES_DIR}
