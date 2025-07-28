@@ -1,12 +1,10 @@
-name: CI Build
+name: CI Publish rocky8-store-dev
 
 on:
-  push:
-    branches: [ "main" ]
-    tags:
-      - '*'
-  pull_request:
-    branches: [ "main" ]
+  workflow_run:
+    workflows: ["CI Publish rocky8-store"]
+    types:
+      - completed
 
 env:
   BUILD_TYPE: Release
@@ -14,6 +12,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -72,10 +71,10 @@ jobs:
       run: |
         find /mnt/dingo-eureka -name ".git" -type d -exec rm -rf {} +
 
-    - name: Pull dingo-base:rocky9
+    - name: Pull dingo-base:rocky8
       if: ${{ github.event_name == 'push'}}
       run: |
-        docker pull dingodatabase/dingo-base:rocky9
+        docker pull dingodatabase/dingo-eureka:rocky8-store
 
     - name: Set up Docker Buildx
       if: ${{ github.event_name == 'push'}}
@@ -88,21 +87,22 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Docker meta of rocky9-fs
+    - name: Docker meta of rocky8-store
       if: ${{ github.event_name == 'push'}}
-      id: rocky9-fs-meta
+      id: rocky8-store-meta
       uses: docker/metadata-action@v5
       with:
-        images: dingodatabase/dingo-eureka
+        images: dingodatabase/dingo-store-rocky-8-dev
         tags: |
-          type=raw,value=rocky9-fs,enable=${{ github.ref_name == 'main' }}
+          type=raw,value=eureka,enable=${{ env.EVENT_TYPE != 'tag' && env.BRANCH_NAME == 'main' }}
+          type=raw,value=eureka-${{ env.TAG_NAME }},enable=${{ env.EVENT_TYPE == 'tag' }}
 
-    - name: Build and push 'dingo-eureka:rocky9-fs'
+    - name: Build and push 'dingo-store-rocky-8-dev:eureka'
       if: ${{ github.event_name == 'push'}}
       uses: docker/build-push-action@v6
       with:
         context: /mnt/dingo-eureka
-        file: /mnt/dingo-eureka/docker/eureka/rocky9/Dockerfile-fs
+        file: /mnt/dingo-eureka/docker/eureka/rocky8/store/Dockerfile-store-dev
         push: true
-        tags: ${{ steps.rocky9-fs-meta.outputs.tags }}
+        tags: ${{ steps.rocky8-store-meta.outputs.tags }}
   
