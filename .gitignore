@@ -45,6 +45,10 @@ docker/base/manylinux/*
 !docker/base/ubuntu24/Dockerfile
 !docker/base/manylinux/Dockerfile
 
+docker/eureka/rocky8/store/*
+!docker/eureka/rocky8/store/Dockerfile-store
+!docker/eureka/rocky8/store/Dockerfile-store-dev
+
 build/
 
 base/pkg
