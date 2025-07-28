@@ -95,7 +95,7 @@ jobs:
       with:
         images: dingodatabase/dingo-eureka
         tags: |
-          type=raw,value=rocky9-fs,enable=${{ env.EVENT_TYPE != 'tag' && env.BRANCH_NAME == 'main' }}
+          type=raw,value=rocky9-fs,enable=${{ env.EVENT_TYPE != 'tag' && github.ref_name == 'main' }}
           type=raw,value=rocky9-fs-${{ env.TAG_NAME }},enable=${{ env.EVENT_TYPE == 'tag' }}
 
     - name: Build and push 'dingo-eureka:rocky9-fs'
