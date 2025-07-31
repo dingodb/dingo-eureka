@@ -1158,7 +1158,6 @@ file(APPEND ${INSTALL_PATH}/include/dingo_eureka_version.h
      "  version += std::string(\"DINGO_EUREKA WITH_LIBRADOS:\") + (DINGO_EUREKA_WITH_LIBRADOS ? \"ON\" : \"OFF\") + \"\\n\";\n")
 file(APPEND ${INSTALL_PATH}/include/dingo_eureka_version.h "  version += std::string(\"DINGO_EUREKA VERSION:[\") + DINGO_EUREKA_VERSION + \"]\" + \"\\n\";\n")
 file(APPEND ${INSTALL_PATH}/include/dingo_eureka_version.h "  version += std::string(\"DINGO_EUREKA GIT_VERSION:[\") + DINGO_EUREKA_GIT_VERSION + \"]\" + \"\\n\";\n")
-file(APPEND ${INSTALL_PATH}/include/dingo_eureka_version.h "  version += std::string(\"DINGO_EUREKA GIT_VERSION:[\") + DINGO_EUREKA_GIT_VERSION + \"]\" + \"\\n\";\n")
 file(APPEND ${INSTALL_PATH}/include/dingo_eureka_version.h
      "  version += std::string(\"DINGO_EUREKA GIT_TAG_NAME:[\") + DINGO_EUREKA_GIT_TAG_NAME + \"]\" + \"\\n\";\n")
 file(APPEND ${INSTALL_PATH}/include/dingo_eureka_version.h
@@ -1181,4 +1180,63 @@ file(APPEND ${INSTALL_PATH}/include/dingo_eureka_version.h "#endif // #ifndef DI
 file(APPEND ${INSTALL_PATH}/include/dingo_eureka_version.h "\n")
 
 
-# TODO: test  dingo_eureka_version.h legal
+# Test dingo_eureka_version.h compilation immediately during CMake configuration
+include(CheckCXXSourceCompiles)
+
+# Set include directory for the test
+set(CMAKE_REQUIRED_INCLUDES ${INSTALL_PATH}/include)
+set(CMAKE_REQUIRED_QUIET TRUE)
+
+# Test source code for basic header inclusion
+set(BASIC_TEST_SOURCE "
+#include \"dingo_eureka_version.h\"
+int main() { return 0; }
+")
+
+# Test source code for macro usage
+set(FULL_TEST_SOURCE "
+#include \"dingo_eureka_version.h\"
+#include <iostream>
+
+int main() {
+    std::cout << \"DINGO_EUREKA_VERSION: \" << DINGO_EUREKA_VERSION << std::endl;
+    std::cout << \"DINGO_EUREKA_GIT_VERSION: \" << DINGO_EUREKA_GIT_VERSION << std::endl;
+    std::cout << \"DINGO_EUREKA_CMAKE_BUILD_TYPE: \" << DINGO_EUREKA_CMAKE_BUILD_TYPE << std::endl;
+    std::cout << FormatDingoEurekaVersion() << std::endl;
+    return 0;
+}
+")
+
+# Perform basic compilation test
+message(STATUS "Checking dingo_eureka_version.h basic syntax...")
+check_cxx_source_compiles("${BASIC_TEST_SOURCE}" DINGO_EUREKA_BASIC_COMPILES)
+
+if(NOT DINGO_EUREKA_BASIC_COMPILES)
+    message(FATAL_ERROR "FAILED: dingo_eureka_version.h has syntax errors and cannot be included!\n"
+                        "Header file location: ${INSTALL_PATH}/include/dingo_eureka_version.h\n"
+                        "Please check the header file for syntax errors.")
+endif()
+
+# Perform full compilation test with macro usage
+message(STATUS "Checking dingo_eureka_version.h macro definitions...")
+check_cxx_source_compiles("${FULL_TEST_SOURCE}" DINGO_EUREKA_FULL_COMPILES)
+
+if(NOT DINGO_EUREKA_FULL_COMPILES)
+    message(FATAL_ERROR "FAILED: dingo_eureka_version.h macros are invalid or incomplete!\n"
+                        "Basic inclusion works but macro usage fails.\n"
+                        "Header file location: ${INSTALL_PATH}/include/dingo_eureka_version.h\n"
+                        "Possible issues:\n"
+                        "  - Undefined macros\n"
+                        "  - Invalid macro values\n"
+                        "  - Missing function definitions")
+endif()
+
+message(STATUS "dingo_eureka_version.h compilation verification PASSED")
+
+# Reset CMAKE_REQUIRED_INCLUDES to avoid affecting other tests
+unset(CMAKE_REQUIRED_INCLUDES)
+
+
+
+
+
