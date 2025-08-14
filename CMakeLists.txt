@@ -44,23 +44,6 @@ set(NINJA_JOBS
     CACHE STRING "Number of jobs to run in parallel when building with ninja")
 message("Number of jobs to run in parallel when building with ninja: ${NINJA_JOBS}")
 
-file(WRITE ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfig.cmake
-     "#This file is mainly used to search dingo-eureka by find_package, do not delete it")
-
-add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake
-    COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfig.cmake
-            ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake
-    DEPENDS ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfig.cmake
-)
-
-add_custom_target(copy_config_files ALL
-    DEPENDS ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake
-)
-
-message(STATUS "dingo-eureka cmake version file: ${INSTALL_PATH}/cmake/dingoEurekaConfigVersion.cmake")
-
 include(ExternalProject)
 
 set(GFLAGS_INCLUDE_DIR
@@ -935,6 +918,17 @@ if(WITH_LIBRADOS)
     DEPENDS openssl boost rdma-core curl)
 endif()
 
+# generated version file
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dingoEurekaConfigVersion.cmake.in
+               ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake @ONLY)
+file(WRITE ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfig.cmake
+     "#This file is mainly used to search dingo-eureka by find_package, do not delete it")
+# copy dingo-eureka cmake version file
+file(COPY ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfig.cmake ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake
+     DESTINATION ${INSTALL_PATH}/cmake)
+
+message(STATUS "dingo-eureka cmake version file: ${INSTALL_PATH}/cmake/dingoEurekaConfigVersion.cmake")
+
 execute_process(
   COMMAND git describe --always --dirty
   OUTPUT_VARIABLE DINGO_EUREKA_GIT_VERSION
@@ -966,9 +960,6 @@ execute_process(
   OUTPUT_VARIABLE DINGO_EUREKA_GIT_SUBMODULE
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
-# string(REPLACE "(" "[" GIT_SUBMODULE_TEMP "${GIT_SUBMODULE_RAW}")
-# string(REPLACE ")" "]" DINGO_EUREKA_GIT_SUBMODULE "${GIT_SUBMODULE_TEMP}")
 
 if(NOT DINGO_EUREKA_GIT_VERSION)
   set(DINGO_EUREKA_GIT_VERSION "unknown")
