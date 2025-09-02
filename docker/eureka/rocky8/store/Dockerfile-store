@@ -10,7 +10,7 @@ COPY ../../../.. .
 # Build and install
 RUN mkdir build && cd build && \
     cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBRADOS=OFF -DWITH_BOOST=ON -DWITH_AWSSDKCPP=OFF -DWITH_LIBFUSE=OFF \
-    -DWITH_LIBUSRBIO=OFF -DWITH_RDMACORE=OFF -DCMAKE_BUILD_TYPE=Release .. && \
+    -DWITH_LIBUSRBIO=OFF -DWITH_RDMACORE=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && \
     ulimit -n 65535 && make -j $(nproc)
 
 # Final stage
