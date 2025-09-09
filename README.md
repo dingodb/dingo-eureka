@@ -2,7 +2,7 @@
 
 ## What's dingo-eureka
 
-The [dingo-sdk](https://github.com/dingodb/dingo-sdk) and [dingofs](https://github.com/dingodb/dingofs) third party
+The [dingo-sdk](https://github.com/dingodb/dingo-sdk), [dingo-store](https://github.com/dingodb/dingo-store) and [dingofs](https://github.com/dingodb/dingofs) third party
 
 ## Dependencies
 
@@ -12,7 +12,7 @@ libfuse compilation requires Meson and Ninja:
 
 ```sh
 sudo dnf install -y epel-release && sudo crb enable
-sudo dnf install -y wget tar git 'gcc-toolset-13*' perl flex bison patch autoconf automake libtool python3-pip pkgconfig libblkid-devel
+sudo dnf install -y wget tar git 'gcc-toolset-13*' perl flex bison patch autoconf automake libtool python3-pip pkgconfig libblkid-devel liburing-devel
 sudo dnf install -y meson ninja-build
 #for ceph librados
 sudo dnf install -y systemd-devel libblkid keyutils-libs-devel libcap-devel python3-pyyaml
@@ -29,7 +29,7 @@ In Ubuntu, /bin/sh points to /bin/dash by default. We need to use /bin/bash as d
 
 ```sh
 sudo apt update
-sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip pkg-config
+sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip pkg-config liburing-dev
 sudo apt install -y meson ninja-build
 #for usrbio
 sudo apt install  gcc-12 g++-12 clang-14 libibverbs-dev
@@ -131,7 +131,7 @@ cmake -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_LIBUSRBIO=OFF ..
 | snappy            | main          |
 | leveldb           | main          |
 | brpc              | 1.12.1        |
-| rocksdb           | v10.2.1       |
+| rocksdb           | v10.5.1       |
 | incbin            | main          |
 | libfiu            | master        |
 | c4c32c            | main          |
