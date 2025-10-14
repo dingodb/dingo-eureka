@@ -97,8 +97,8 @@ jobs:
         tags: |
           type=raw,value=rocky8-store,enable=${{ env.EVENT_TYPE != 'tag' && github.ref_name == 'main' }}
           type=raw,value=rocky8-store-${{ env.TAG_NAME }},enable=${{ env.EVENT_TYPE == 'tag' }}
-          type=sha,prefix=,format=short,enable=${{ github.ref_name == 'main' && env.EVENT_TYPE != 'tag' }}
-          type=sha,prefix=${{ github.ref_name }}-,format=short,enable=${{ env.EVENT_TYPE != 'tag' && github.ref_name != 'main' }}
+          type=sha,prefix=rocky8-store-,format=short,enable=${{ github.ref_name == 'main' && env.EVENT_TYPE != 'tag' }}
+          type=sha,prefix=rocky8-store-${{ github.ref_name }}-,format=short,enable=${{ env.EVENT_TYPE != 'tag' && github.ref_name != 'main' }}
 
     - name: Build and push 'dingo-eureka:rocky8-store'
       if: ${{ github.event_name == 'push'}}
