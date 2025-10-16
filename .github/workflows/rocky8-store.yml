@@ -108,4 +108,8 @@ jobs:
         file: /mnt/dingo-eureka/docker/eureka/rocky8/store/Dockerfile-store
         push: true
         tags: ${{ steps.rocky8-store-meta.outputs.tags }}
+
+    - name: Check disk usage
+      if: ${{ github.event_name == 'push'}}
+      run: df -h
   
