@@ -25,9 +25,14 @@ sudo cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ &&  sudo cp -rf  cma
 
 ### Ubuntu 22.04/24.04
 
-In Ubuntu, /bin/sh points to /bin/dash by default. We need to use /bin/bash as default shell. un `sudo dpkg-reconfigure dash` and select the option not to use /bin/dash as the default shell.
+In Ubuntu, /bin/sh points to /bin/dash by default. We need to use /bin/bash as default shell. 
 
 ```sh
+# select the option not to use /bin/dash as the default shell 
+sudo dpkg-reconfigure dash
+# check sh is link to bash
+ls -al /bin/sh 
+
 sudo apt update
 sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip pkg-config liburing-dev
 sudo apt install -y meson ninja-build
@@ -130,7 +135,7 @@ cmake -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_LIBUSRBIO=OFF ..
 | grpc              | v1.62.2       |
 | snappy            | main          |
 | leveldb           | main          |
-| brpc              | 1.12.1        |
+| brpc              | 1.15.0        |
 | rocksdb           | v10.5.1       |
 | incbin            | main          |
 | libfiu            | master        |
