@@ -5,13 +5,13 @@ FROM dingodatabase/dingo-base:rocky9 AS builder
 WORKDIR /dingo-eureka
 
 # Copy the project files to the working directory
-COPY ../../.. .
+COPY ../../../.. .
 
 # Build and install
 RUN mkdir build && cd build && \
-    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBRADOS=OFF -DWITH_BOOST=OFF -DWITH_AWSSDKCPP=OFF -DWITH_LIBFUSE=OFF \
-    -DWITH_LIBUSRBIO=OFF -DWITH_RDMACORE=OFF .. && \
-    ulimit -n 65535 && make -j 32
+    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBRADOS=OFF -DWITH_BOOST=ON -DWITH_AWSSDKCPP=OFF -DWITH_LIBFUSE=OFF \
+    -DWITH_LIBUSRBIO=OFF -DWITH_RDMACORE=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && \
+    ulimit -n 65535 && make -j $(nproc)
 
 # Final stage
 FROM dingodatabase/dingo-base:rocky9
@@ -21,4 +21,3 @@ ENV DINGO_EUREKA_INSTALL_PATH=/root/.local/dingo-eureka
 
 # Copy installed files from builder
 COPY --from=builder /root/.local/dingo-eureka /root/.local/dingo-eureka
-
