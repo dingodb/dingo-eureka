@@ -643,7 +643,7 @@ ExternalProject_Add(
   CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
              -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
              -DBUILD_SHARED_LIBS=OFF
-             -DWITH_OTLP_GRPC=OFF
+             -DWITH_OTLP_GRPC=ON
              -DWITH_OTLP_HTTP=ON
              -DWITH_PROMETHEUS=OFF
              -DBUILD_TESTING=OFF
