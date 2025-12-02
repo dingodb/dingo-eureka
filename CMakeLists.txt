@@ -918,6 +918,19 @@ if(WITH_LIBRADOS)
     DEPENDS openssl boost rdma-core curl)
 endif()
 
+
+# used for fs
+ExternalProject_Add(
+  tikvcpp
+  PREFIX client-cpp
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/client-cpp
+  CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+             -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+  CMAKE_CACHE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+                   -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
+)
+
+
 # generated version file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dingoEurekaConfigVersion.cmake.in
                ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake @ONLY)
