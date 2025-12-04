@@ -12,6 +12,7 @@ SHELL ["/bin/bash", "-c"]
 # wget -P /tmp/ https://github.com/bazelbuild/bazel/releases/download/4.2.4/bazel-4.2.4-linux-x86_64
 # wget -P /tmp/ https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
 # wget -P /tmp/ https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+# wget -P /tmp/ https://static.rust-lang.org/dist/rust-1.91.1-x86_64-unknown-linux-gnu.tar.xz
 COPY cmake-3.30.1-linux-x86_64.tar.gz musl-1.2.5.tar.gz protoc-25.1-linux-x86_64.zip go1.23.4.linux-amd64.tar.gz jemalloc-5.3.0.tar.bz2 ninja-linux.zip /tmp/
 
 # Step 1: Update the repository configuration to use Aliyun mirrors
@@ -26,6 +27,7 @@ RUN dnf update -y  \
     && dnf install -y epel-release  \
     && dnf install -y wget tar git gcc-toolset-13* perl flex bison patch fuse3-devel  libnl3-devel libunwind-devel python3-devel net-tools iproute bzip2 vim autoconf automake libtool \
     && dnf install -y systemd-devel libblkid libblkid-devel keyutils-libs-devel libcap-devel \
+    && dnf install -y nmap-ncat iputils \
     && dnf clean all \
     && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo ${TZ} > /etc/timezone
@@ -56,4 +58,17 @@ RUN cd /tmp && unzip ninja-linux.zip -d /usr/local/bin && chmod +x /usr/local/bi
 # Install build dependencies
 RUN dnf groupinstall -y "Development Tools"
 
-ENV PATH=/opt/rh/gcc-toolset-13/root/usr/bin:/usr/local/go/bin:/root/go/bin:/root/.local/bin:/usr/local/musl/bin:$PATH
+# Install Rust using rustup
+# RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+
+# ENV with online install rust, with PATH /root/.cargo/bin
+# ENV PATH=/opt/rh/gcc-toolset-13/root/usr/bin:/usr/local/bin:/usr/local/go/bin:/root/go/bin:/root/.local/bin:/usr/local/musl/bin:/root/.cargo/bin:$PATH
+
+# offline install rust, with PATH /root/.cargo/bin
+RUN cd /tmp && tar -xJf rust-1.91.1-x86_64-unknown-linux-gnu.tar.xz \
+    && cd rust-1.91.1-x86_64-unknown-linux-gnu \
+    && ./install.sh \
+    && rm -rf /tmp/rust-1.91.1-x86_64-unknown-linux-gnu.tar.xz
+
+# Set environment variables
+ENV PATH=/opt/rh/gcc-toolset-13/root/usr/bin:/usr/local/bin:/usr/local/go/bin:/root/go/bin:/root/.local/bin:/usr/local/musl/bin:$PATH
