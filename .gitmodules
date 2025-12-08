@@ -121,6 +121,6 @@
 [submodule "toml11"]
 	path = toml11
 	url = https://github.com/ToruNiina/toml11.git
-[submodule "client-cpp"]
-	path = client-cpp
+[submodule "tikv-client-cpp"]
+	path = tikv-client-cpp
 	url = https://github.com/dingodb/client-cpp.git
