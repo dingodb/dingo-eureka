@@ -924,8 +924,8 @@ option(WITH_TIKVCPP "Build tikv-cpp client library" ON)
 if(WITH_TIKVCPP)
   ExternalProject_Add(
     tikvcpp
-    PREFIX client-cpp
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/client-cpp
+    PREFIX tikv-client-cpp
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tikv-client-cpp
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
                -DOPENSSL_ROOT_DIR:PATH=${INSTALL_PATH}
