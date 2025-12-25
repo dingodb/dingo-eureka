@@ -653,7 +653,7 @@ ExternalProject_Add(
     -DOPENSSL_ROOT_DIR:PATH=${INSTALL_PATH} -DProtobuf_DIR:PATH=${_FINDPACKAGE_PROTOBUF_CONFIG_DIR}
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
     -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
-  DEPENDS curl protobuf openssl nlohmann-json)
+  DEPENDS curl protobuf openssl nlohmann-json grpc)
 
 option(WITH_AWSSDKCPP "Build aws-sdk-cpp library" ON)
 
