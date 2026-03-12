@@ -1,6 +1,9 @@
 # Use the specified base image
 FROM dingodatabase/dingo-base:ubuntu2204 AS builder
 
+# Use bash instead of dash as /bin/sh
+RUN ln -sf /bin/bash /bin/sh
+
 # Create a working directory
 WORKDIR /dingo-eureka
 
