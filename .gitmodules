@@ -43,9 +43,6 @@
 [submodule "crc32c"]
 	path = crc32c
 	url = https://github.com/google/crc32c.git
-[submodule "memcache"]
-	path = memcache
-	url = https://github.com/awesomized/libmemcached
 [submodule "spdlog"]
 	path = spdlog
 	url = https://github.com/gabime/spdlog.git
