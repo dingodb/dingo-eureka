@@ -9,10 +9,9 @@ COPY ../../.. .
 
 # Install cmake 3.30.1 to avoid cmake 4.x incompatibility with old cmake_minimum_required versions
 RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz && \
-    tar zxf cmake-3.30.1-linux-x86_64.tar.gz && \
-    cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ && \
-    cp -rf cmake-3.30.1-linux-x86_64/share/* /usr/local/share/ && \
-    rm -rf cmake-3.30.1-linux-x86_64 cmake-3.30.1-linux-x86_64.tar.gz
+    tar zxf cmake-3.30.1-linux-x86_64.tar.gz -C /opt/ && \
+    rm cmake-3.30.1-linux-x86_64.tar.gz
+ENV PATH="/opt/cmake-3.30.1-linux-x86_64/bin:$PATH"
 
 # Build and install
 RUN mkdir build && cd build && \
