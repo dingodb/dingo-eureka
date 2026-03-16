@@ -112,7 +112,7 @@ ExternalProject_Add(
   CMAKE_CACHE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
                    -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib)
 
-option(WITH_PYBIND11 "Build pybind11 library" ON)
+option(WITH_PYBIND11 "Build pybind11 library" OFF)
 
 if(WITH_PYBIND11)
   ExternalProject_Add(

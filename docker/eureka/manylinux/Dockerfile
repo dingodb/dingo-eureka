@@ -9,7 +9,7 @@ COPY ../../.. .
 
 # Build and install
 RUN mkdir build && cd build && \
-    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBUSRBIO=OFF -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_TOML11=OFF -DWITH_LIBFUSE=OFF -DWITH_AWSSDKCPP=OFF .. && \
+    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBUSRBIO=OFF -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_TOML11=OFF -DWITH_LIBFUSE=OFF -DWITH_AWSSDKCPP=OFF -DWITH_PYBIND11=ON .. && \
     ulimit -n 65535 && make -j2 -k
 
 # Final stage
