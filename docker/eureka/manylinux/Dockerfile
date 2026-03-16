@@ -7,9 +7,16 @@ WORKDIR /dingo-eureka
 # Copy the project files to the working directory
 COPY ../../.. .
 
+# Install cmake 3.30.1 to avoid cmake 4.x incompatibility with old cmake_minimum_required versions
+RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-linux-x86_64.tar.gz && \
+    tar zxf cmake-3.30.1-linux-x86_64.tar.gz && \
+    cp -rf cmake-3.30.1-linux-x86_64/bin/* /usr/local/bin/ && \
+    cp -rf cmake-3.30.1-linux-x86_64/share/* /usr/local/share/ && \
+    rm -rf cmake-3.30.1-linux-x86_64 cmake-3.30.1-linux-x86_64.tar.gz
+
 # Build and install
 RUN mkdir build && cd build && \
-    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBUSRBIO=OFF -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_TOML11=OFF -DWITH_LIBFUSE=OFF -DWITH_AWSSDKCPP=OFF -DWITH_PYBIND11=ON .. && \
+    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBUSRBIO=OFF -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_TOML11=OFF -DWITH_LIBFUSE=OFF -DWITH_AWSSDKCPP=OFF -DWITH_TIKVCPP=OFF -DWITH_PYBIND11=ON .. && \
     ulimit -n 65535 && make -j2 -k
 
 # Final stage
