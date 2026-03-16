@@ -121,3 +121,6 @@
 [submodule "tikv-client-cpp"]
 	path = tikv-client-cpp
 	url = https://github.com/dingodb/client-cpp.git
+[submodule "pybind11"]
+	path = pybind11
+	url = https://github.com/pybind/pybind11
