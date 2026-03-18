@@ -1,0 +1,47 @@
+# Use the specified base image
+FROM dingodatabase/dingo-base:rocky9 AS builder
+
+# Create a working directory
+WORKDIR /dingo-eureka
+
+# Copy the project files to the working directory
+COPY ../../.. .
+
+# Configure dingo-eureka (WITH_LIBUSRBIO is Ubuntu-only; WITH_TIKVCPP requires Rust, keep both OFF)
+# CMAKE_POSITION_INDEPENDENT_CODE=ON: all ExternalProject static libs must be PIC so they can
+# be linked into a Python .so extension module during cibuildwheel.
+RUN mkdir build && cd build && \
+    cmake -DINSTALL_PATH=/root/.local/dingo-eureka \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+          -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+          -DWITH_LIBUSRBIO=OFF \
+          -DWITH_TIKVCPP=OFF \
+          ..
+
+# Build and install dingo-eureka
+RUN cd /dingo-eureka/build && ulimit -n 65535 && make -j $(nproc) -k
+
+# Build and install dingo-sdk
+RUN cd / && git clone https://github.com/dingodb/dingo-sdk.git && \
+    cd dingo-sdk && \
+    git submodule sync --recursive && git submodule update --init --recursive && \
+    mkdir build && cd build && cmake -DTHIRD_PARTY_INSTALL_PATH=/root/.local/dingo-eureka -DCMAKE_INSTALL_PREFIX=/root/.local/dingo-sdk -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SDK_EXAMPLE=OFF -DBUILD_BENCHMARK=OFF -DBUILD_PYTHON_SDK=OFF -DBUILD_INTEGRATION_TESTS=OFF -DBUILD_UNIT_TESTS=OFF .. && \
+    make -j $(nproc) && make install
+
+# Final stage
+FROM dingodatabase/dingo-base:manylinux_2_34
+
+# Install system devel packages needed when linking against librados:
+#   systemd-devel : provides libudev.h + libudev (required by Findrados.cmake)
+#   libblkid-devel: provides blkid.h + libblkid (required by Findrados.cmake)
+#   keyutils-libs-devel: provides keyutils (linked into librados)
+RUN dnf install -y systemd-devel libblkid-devel keyutils-libs-devel && \
+    dnf clean all
+
+ENV THIRD_PARTY_INSTALL_PATH=/root/.local/dingo-eureka
+ENV DINGO_EUREKA_INSTALL_PATH=/root/.local/dingo-eureka
+ENV DINGOSDK_INSTALL_PATH=/root/.local/dingo-sdk
+
+# Copy installed files from builder
+COPY --from=builder /root/.local/dingo-eureka /root/.local/dingo-eureka
+COPY --from=builder /root/.local/dingo-sdk /root/.local/dingo-sdk
