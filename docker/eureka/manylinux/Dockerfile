@@ -15,7 +15,7 @@ ENV PATH="/opt/cmake-3.30.1-linux-x86_64/bin:$PATH"
 
 # Build and install
 RUN mkdir build && cd build && \
-    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBUSRBIO=OFF -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_TOML11=OFF -DWITH_LIBFUSE=OFF -DWITH_AWSSDKCPP=OFF -DWITH_TIKVCPP=OFF -DWITH_PYBIND11=ON .. && \
+    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_LIBUSRBIO=OFF -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_TOML11=OFF -DWITH_LIBFUSE=OFF -DWITH_AWSSDKCPP=OFF -DWITH_TIKVCPP=OFF -DWITH_NANOBIND=ON .. && \
     ulimit -n 65535 && make -j2 -k
 
 # Final stage
