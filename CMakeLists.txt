@@ -952,6 +952,21 @@ if(WITH_TIKVCPP)
   )
 endif()
 
+# used for fs
+option(WITH_TIKVGO "Build tikv-go client library" ON)
+if(WITH_TIKVGO)
+  ExternalProject_Add(
+    tikvgo
+    PREFIX tikv-client-go
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tikv-client-go
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+               -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+    CMAKE_CACHE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE 
+                     -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+  )
+endif()
+
+
 # generated version file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dingoEurekaConfigVersion.cmake.in
                ${CMAKE_BINARY_DIR}/cmake/dingoEurekaConfigVersion.cmake @ONLY)

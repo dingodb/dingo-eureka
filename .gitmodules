@@ -124,3 +124,6 @@
 [submodule "nanobind"]
 	path = nanobind
 	url = https://github.com/wjakob/nanobind
+[submodule "tikv-client-go"]
+	path = tikv-client-go
+	url = https://github.com/dingodb/tikv-client-go.git
