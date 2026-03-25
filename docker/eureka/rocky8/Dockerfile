@@ -9,7 +9,7 @@ COPY ../../.. .
 
 # Build and install
 RUN mkdir build && cd build && \
-    cmake -DINSTALL_PATH=/root/.local/dingo-eureka -DWITH_TIKVGO=OFF .. && \
+    cmake -DINSTALL_PATH=/root/.local/dingo-eureka .. && \
     ulimit -n 65535 && make -j 32
 
 # Final stage
