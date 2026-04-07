@@ -477,6 +477,9 @@ ExternalProject_Add(
              -DWITH_TRACE_TOOLS=OFF
              -DPORTABLE=haswell
              -DUSE_RTTI=ON
+             # Workaround GCC 12 false positive -Warray-bounds in stl_algobase.h
+             # See: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329
+             -DCMAKE_CXX_FLAGS=-Wno-error=array-bounds
   CMAKE_CACHE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE -DZLIB_ROOT:STRING=${INSTALL_PATH}
                    -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH} -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib
   DEPENDS gflags zlib snappy lz4 zstd liburing)
