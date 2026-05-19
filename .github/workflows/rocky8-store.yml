@@ -67,10 +67,10 @@ jobs:
         git submodule sync --recursive
         git submodule update --init --recursive
 
-    - name: Clean .git directory
-      if: ${{ github.event_name == 'push'}}
-      run: |
-        find /mnt/dingo-eureka -name ".git" -type d -exec rm -rf {} +
+    # - name: Clean .git directory
+    #   if: ${{ github.event_name == 'push'}}
+    #   run: |
+    #     find /mnt/dingo-eureka -name ".git" -type d -exec rm -rf {} +
 
     - name: Pull dingo-base:rocky8
       if: ${{ github.event_name == 'push'}}
