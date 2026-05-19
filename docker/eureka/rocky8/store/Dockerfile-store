@@ -5,7 +5,13 @@ FROM dingodatabase/dingo-base:rocky8 AS builder
 WORKDIR /dingo-eureka
 
 # Copy the project files to the working directory
-COPY ../../../.. .
+COPY . .
+
+# list files in the current directory for debugging
+RUN ls -la /dingo-eureka
+
+# Check /dingo-eureka have .git directory, if not, exit with error
+RUN if [ ! -d ".git" ]; then echo "Error: .git directory not found in /dingo-eureka." && exit 1; fi
 
 # Build and install
 RUN mkdir build && cd build && \
