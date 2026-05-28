@@ -741,6 +741,7 @@ if(WITH_LIBFUSE)
       meson setup ${LIBFUSE_SOURCES_DIR} ${LIBFUSE_BINARY_DIR} --prefix=${INSTALL_PATH} --buildtype=${MESON_BUILD_TYPE}
       --default-library=static --libdir=lib --includedir=include -Dexamples=false -Duseroot=false
       -Dudevrulesdir=${INSTALL_PATH}/include/fuse3/etc -Dinitscriptdir= -Dsysconfdir=${INSTALL_PATH}/include/fuse3/etc
+      -Denable-io-uring=true
     BUILD_COMMAND meson compile -C ${LIBFUSE_BINARY_DIR}
     INSTALL_COMMAND meson install -C ${LIBFUSE_BINARY_DIR}
     BUILD_ALWAYS FALSE)
