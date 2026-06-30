@@ -93,7 +93,8 @@
 	url = https://github.com/ianlancetaylor/libbacktrace
 [submodule "libfuse"]
 	path = libfuse
-	url = https://github.com/libfuse/libfuse.git
+	url = https://github.com/dingodb/libfuse.git
+	branch = dingo
 [submodule "double-conversion"]
 	path = double-conversion
 	url = https://github.com/google/double-conversion.git
