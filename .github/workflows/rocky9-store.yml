@@ -35,12 +35,28 @@ jobs:
           fi
         fi
 
+    - name: Free disk space
+      if: ${{ github.event_name == 'push'}}
+      run: |
+        df -h /
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /usr/local/.ghcup
+        sudo swapoff -a || true
+        sudo rm -f /mnt/swapfile || true
+        sudo install -d -o "$USER" -g "$USER" -m 700 /mnt/tmp
+        df -h /
+
     - name: Copy dingo-eureka repository
       if: ${{ github.event_name == 'push'}}
       run: |
         echo "Move dingo-eureka repository"
         sudo cp -r /home/runner/work/dingo-eureka/dingo-eureka /mnt/
         sudo chown -R $USER:$USER /mnt/dingo-eureka
+        echo "Remove original checkout on / to reclaim root-disk space"
+        sudo rm -rf /home/runner/work/dingo-eureka/dingo-eureka
+        mkdir -p /home/runner/work/dingo-eureka/dingo-eureka
+        df -h /
 
     - name: Set Safe Dir
       if: ${{ github.event_name == 'push'}}
@@ -102,6 +118,8 @@ jobs:
 
     - name: Build and push 'dingo-eureka:rocky9-store'
       if: ${{ github.event_name == 'push'}}
+      env:
+        TMPDIR: /mnt/tmp
       uses: docker/build-push-action@v6
       with:
         context: /mnt/dingo-eureka
