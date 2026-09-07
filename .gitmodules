@@ -128,3 +128,9 @@
 [submodule "tikv-client-go"]
 	path = tikv-client-go
 	url = https://github.com/dingodb/tikv-client-go.git
+[submodule "folly"]
+	path = folly
+	url = https://github.com/facebook/folly.git
+[submodule "fast_float"]
+	path = fast_float
+	url = https://github.com/fastfloat/fast_float.git
