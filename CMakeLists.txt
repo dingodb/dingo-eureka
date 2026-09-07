@@ -807,6 +807,38 @@ if(WITH_BOOST)
     DEPENDS zlib zstd)
 endif()
 
+# used by fs
+option(WITH_FOLLY "Build folly library" ON)
+
+if(WITH_FOLLY)
+  ExternalProject_Add(
+    folly
+    PREFIX folly
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/folly
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+               -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
+               -DBUILD_SHARED_LIBS=OFF
+               -DBUILD_TESTS=OFF
+               -DBUILD_BENCHMARKS=OFF
+               -DBoost_USE_STATIC_LIBS=ON
+               -DBOOST_LINK_STATIC=ON
+               -DFASTFLOAT_INCLUDE_DIR:PATH=${CMAKE_CURRENT_SOURCE_DIR}/fast_float/include
+    CMAKE_CACHE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+                     -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
+                     -DLIB_INSTALL_DIR:STRING=lib
+                     -DINCLUDE_INSTALL_DIR:STRING=include
+    DEPENDS boost
+            gflags
+            glog
+            libevent
+            double-conversion
+            openssl
+            snappy
+            lz4
+            zstd
+            zlib)
+endif()
+
 # used by fs 3fs libusrbio
 option(WITH_LIBUSRBIO "Build 3fs usrbio library" ON)
 
@@ -1050,6 +1082,7 @@ set_feature_flag(WITH_GRPC DINGO_EUREKA_WITH_GRPC)
 set_feature_flag(WITH_AWSSDKCPP DINGO_EUREKA_WITH_AWSSDKCPP)
 set_feature_flag(WITH_LIBFUSE DINGO_EUREKA_WITH_LIBFUSE)
 set_feature_flag(WITH_BOOST DINGO_EUREKA_WITH_BOOST)
+set_feature_flag(WITH_FOLLY DINGO_EUREKA_WITH_FOLLY)
 set_feature_flag(WITH_LIBUSRBIO DINGO_EUREKA_WITH_LIBUSRBIO)
 set_feature_flag(WITH_RDMACORE DINGO_EUREKA_WITH_RDMACORE)
 set_feature_flag(WITH_LIBRADOS DINGO_EUREKA_WITH_LIBRADOS)
