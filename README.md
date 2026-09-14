@@ -36,8 +36,8 @@ ls -al /bin/sh
 sudo apt update
 sudo apt install -y wget tar git make patch gcc g++ perl flex bison autoconf automake libtool python3-pip pkg-config liburing-dev
 sudo apt install -y meson ninja-build
-#for usrbio
-sudo apt install  gcc-12 g++-12 clang-14 libibverbs-dev
+#for brpc RDMA
+sudo apt install -y libibverbs-dev
 #for ceph librados
 sudo apt install -y libudev-dev libblkid-dev libkeyutils-dev libcap-dev cython3 python3-yaml 
 
@@ -104,16 +104,10 @@ disable rados library build
 cmake -DWITH_LIBRADOS=OFF ..
 ```
 
-disable 3fs usrbio library build
-
-```shell
-cmake -DWITH_LIBUSRBIO=OFF ..
-```
-
 disable boost library build
 
-note:you must also disable libusrbio and librados,because they depend on boost
+note:you must also disable folly and librados,because they depend on boost
 
 ```shell
-cmake -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_LIBUSRBIO=OFF ..
+cmake -DWITH_BOOST=OFF -DWITH_LIBRADOS=OFF -DWITH_FOLLY=OFF ..
 ```

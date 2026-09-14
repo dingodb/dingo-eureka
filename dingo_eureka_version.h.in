@@ -37,7 +37,6 @@ static const int DINGO_EUREKA_WITH_GRPC = @DINGO_EUREKA_WITH_GRPC@;
 static const int DINGO_EUREKA_WITH_AWSSDKCPP = @DINGO_EUREKA_WITH_AWSSDKCPP@;
 static const int DINGO_EUREKA_WITH_LIBFUSE = @DINGO_EUREKA_WITH_LIBFUSE@;
 static const int DINGO_EUREKA_WITH_BOOST = @DINGO_EUREKA_WITH_BOOST@;
-static const int DINGO_EUREKA_WITH_LIBUSRBIO = @DINGO_EUREKA_WITH_LIBUSRBIO@;
 static const int DINGO_EUREKA_WITH_RDMACORE = @DINGO_EUREKA_WITH_RDMACORE@;
 static const int DINGO_EUREKA_WITH_LIBRADOS = @DINGO_EUREKA_WITH_LIBRADOS@;
 
@@ -54,7 +53,6 @@ inline const std::string& FormatDingoEurekaVersion() {
   version += std::string("DINGO_EUREKA WITH_AWSSDKCPP:") + (DINGO_EUREKA_WITH_AWSSDKCPP ? "ON" : "OFF") + "\n";
   version += std::string("DINGO_EUREKA WITH_LIBFUSE:") + (DINGO_EUREKA_WITH_LIBFUSE ? "ON" : "OFF") + "\n";
   version += std::string("DINGO_EUREKA WITH_BOOST:") + (DINGO_EUREKA_WITH_BOOST ? "ON" : "OFF") + "\n";
-  version += std::string("DINGO_EUREKA WITH_LIBUSRBIO:") + (DINGO_EUREKA_WITH_LIBUSRBIO ? "ON" : "OFF") + "\n";
   version += std::string("DINGO_EUREKA WITH_RDMACORE:") + (DINGO_EUREKA_WITH_RDMACORE ? "ON" : "OFF") + "\n";
   version += std::string("DINGO_EUREKA WITH_LIBRADOS:") + (DINGO_EUREKA_WITH_LIBRADOS ? "ON" : "OFF") + "\n";
   version += std::string("DINGO_EUREKA VERSION:[") + DINGO_EUREKA_VERSION + "]" + "\n";

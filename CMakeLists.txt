@@ -839,60 +839,6 @@ if(WITH_FOLLY)
             zlib)
 endif()
 
-# used by fs 3fs libusrbio
-option(WITH_LIBUSRBIO "Build 3fs usrbio library" ON)
-
-cmake_host_system_information(RESULT PRETTY_NAME QUERY DISTRIB_PRETTY_NAME)
-if(WITH_LIBUSRBIO AND ${PRETTY_NAME} MATCHES "Ubuntu")
-  if(NOT WITH_BOOST)
-    message(FATAL_ERROR "LIBUSRBIO requires BOOST,please enable by WITH_BOOST")
-  endif()
-
-  set(LIBUSRBIO_ORI_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libusrbio)
-
-  set(LIBUSRBIO_SOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/libusrbio)
-  set(LIBUSRBIO_BINARY_DIR ${LIBUSRBIO_SOURCES_DIR}/build)
-
-  file(WRITE ${LIBUSRBIO_SOURCES_DIR}/copy_repo.sh "mkdir -p ${LIBUSRBIO_BINARY_DIR} && \
-        rsync -a ${LIBUSRBIO_ORI_SOURCES_DIR}/. ${LIBUSRBIO_SOURCES_DIR}/")
-
-  message(STATUS "copy libusrbio repo to build dir")
-  execute_process(COMMAND sh ${LIBUSRBIO_SOURCES_DIR}/copy_repo.sh)
-
-  message(STATUS "apply patch to 3fs usrbio")
-  execute_process(COMMAND ./patches/apply.sh WORKING_DIRECTORY ${LIBUSRBIO_SOURCES_DIR})
-  ExternalProject_Add(
-    libusrbio
-    SOURCE_DIR ${LIBUSRBIO_SOURCES_DIR}
-    BINARY_DIR ${LIBUSRBIO_BINARY_DIR}
-    CMAKE_ARGS -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
-               -DCMAKE_CXX_COMPILER=clang++-14
-               -DCMAKE_C_COMPILER=clang-14
-               -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-               -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${LIBUSRBIO_BINARY_DIR}/lib
-               -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${LIBUSRBIO_BINARY_DIR}/lib
-               -DBOOST_LINK_STATIC=ON
-               -DBoost_USE_STATIC_RUNTIME=ON
-               # Using 3fs built-in libfmt-v10 library
-               -DCMAKE_CXX_FLAGS="-I${LIBUSRBIO_SOURCES_DIR}/third_party/fmt/include"
-    CMAKE_CACHE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-    BUILD_COMMAND ${CMAKE_COMMAND} --build ${LIBUSRBIO_BINARY_DIR} --target usrbio -j
-    # copy library to install path
-    COMMAND cp ${LIBUSRBIO_SOURCES_DIR}/src/lib/api/hf3fs_usrbio.h ${INSTALL_PATH}/include/
-    COMMAND cp ${LIBUSRBIO_BINARY_DIR}/lib/libfolly.a ${INSTALL_PATH}/lib/
-    COMMAND cp ${LIBUSRBIO_BINARY_DIR}/lib/libusrbio.a ${INSTALL_PATH}/lib/
-    INSTALL_COMMAND ""
-    BUILD_ALWAYS FALSE
-    DEPENDS gflags
-            glog
-            double-conversion
-            libevent
-            numactl
-            openssl
-            boost)
-
-endif()
-
 # used by fs
 option(WITH_RDMACORE "Build rdma-core library" ON)
 
@@ -1083,7 +1029,6 @@ set_feature_flag(WITH_AWSSDKCPP DINGO_EUREKA_WITH_AWSSDKCPP)
 set_feature_flag(WITH_LIBFUSE DINGO_EUREKA_WITH_LIBFUSE)
 set_feature_flag(WITH_BOOST DINGO_EUREKA_WITH_BOOST)
 set_feature_flag(WITH_FOLLY DINGO_EUREKA_WITH_FOLLY)
-set_feature_flag(WITH_LIBUSRBIO DINGO_EUREKA_WITH_LIBUSRBIO)
 set_feature_flag(WITH_RDMACORE DINGO_EUREKA_WITH_RDMACORE)
 set_feature_flag(WITH_LIBRADOS DINGO_EUREKA_WITH_LIBRADOS)
 

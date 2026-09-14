@@ -7,14 +7,13 @@ WORKDIR /dingo-eureka
 # Copy the project files to the working directory
 COPY ../../.. .
 
-# Configure dingo-eureka (WITH_LIBUSRBIO is Ubuntu-only; WITH_TIKVCPP requires Rust, keep both OFF)
+# Configure dingo-eureka (WITH_TIKVCPP requires Rust, keep it OFF)
 # CMAKE_POSITION_INDEPENDENT_CODE=ON: all ExternalProject static libs must be PIC so they can
 # be linked into a Python .so extension module during cibuildwheel.
 RUN mkdir build && cd build && \
     cmake -DINSTALL_PATH=/root/.local/dingo-eureka \
           -DCMAKE_BUILD_TYPE=RelWithDebInfo \
           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-          -DWITH_LIBUSRBIO=OFF \
           -DWITH_TIKVCPP=OFF \
           ..
 
