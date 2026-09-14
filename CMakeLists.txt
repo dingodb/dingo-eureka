@@ -818,6 +818,8 @@ if(WITH_FOLLY)
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
                -DBUILD_SHARED_LIBS=OFF
+               # DingoFS statically links libstdc++; exception tracer interposes its ABI.
+               -DFOLLY_NO_EXCEPTION_TRACER=ON
                -DBUILD_TESTS=OFF
                -DBUILD_BENCHMARKS=OFF
                -DBoost_USE_STATIC_LIBS=ON
