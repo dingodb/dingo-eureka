@@ -355,20 +355,41 @@ ExternalProject_Add(
   CMAKE_CACHE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=TRUE -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
                    -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib)
 
-# used by sdk/fs If minimal .a is need, you can set  WITH_DEBUG_SYMBOLS=OFF
-# used by fs; must be declared before the brpc project so its WITH_RDMA flag
-# (which needs the rdma-core-built ibverbs) can follow this option.
+# used by sdk/fs If minimal .a is need, you can set WITH_DEBUG_SYMBOLS=OFF
+# brpc RDMA needs the ibverbs installed by rdma-core.
 option(WITH_RDMACORE "Build rdma-core library" ON)
 option(WITH_BRPC_RDMA "Build brpc with RDMA (enables WITH_RDMACORE)" ON)
 if(WITH_BRPC_RDMA AND NOT WITH_RDMACORE)
   message(STATUS "WITH_BRPC_RDMA=ON requires rdma-core: enabling WITH_RDMACORE")
   set(WITH_RDMACORE ON CACHE BOOL "Build rdma-core library" FORCE)
 endif()
-# brpc RDMA configure needs the ibverbs installed by the rdma-core project;
-# declare the build order explicitly so parallel make cannot race it.
-set(BRPC_DEPENDS_RDMA "")
+
+set(RDMACORE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rdma-core)
+set(RDMACORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/rdma-core/build)
+
+if(WITH_RDMACORE)
+  ExternalProject_Add(
+    rdma-core
+    PREFIX rdma-core
+    SOURCE_DIR ${RDMACORE_SOURCES_DIR}
+    BINARY_DIR ${RDMACORE_BINARY_DIR}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -GNinja -S <SOURCE_DIR> -B <BINARY_DIR> -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+                      -DENABLE_STATIC=ON -DENABLE_VALGRIND=OFF -DENABLE_RESOLVE_NEIGH=OFF -DNO_MAN_PAGES=ON -DNO_PYVERBS=1
+                      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    BUILD_COMMAND ninja -C <BINARY_DIR> -v -j ${NINJA_JOBS}
+    COMMAND cp -RL <BINARY_DIR>/include/infiniband ${INSTALL_PATH}/include/
+    COMMAND cp -RL <BINARY_DIR>/include/rdma ${INSTALL_PATH}/include/
+    COMMAND cp <BINARY_DIR>/lib/librdmacm.a ${INSTALL_PATH}/lib/
+    COMMAND cp <BINARY_DIR>/lib/libibverbs.a ${INSTALL_PATH}/lib/
+    COMMAND cp <BINARY_DIR>/lib/pkgconfig/libibverbs.pc ${INSTALL_PATH}/lib/pkgconfig
+    COMMAND cp <BINARY_DIR>/lib/pkgconfig/librdmacm.pc ${INSTALL_PATH}/lib/pkgconfig
+    INSTALL_COMMAND ""
+    BUILD_ALWAYS FALSE)
+endif()
+
+set(BRPC_DEPENDS zlib snappy protobuf leveldb gflags glog openssl)
 if(WITH_BRPC_RDMA)
-  set(BRPC_DEPENDS_RDMA " rdma-core")
+  list(APPEND BRPC_DEPENDS rdma-core)
 endif()
 
 
@@ -376,14 +397,14 @@ set(BRPC_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/brpc/build)
 set(DYNAMIC_ANNOTATIONS_HEADER_PATH ${INSTALL_PATH}/include/butil/third_party/dynamic_annotations/dynamic_annotations.h)
 ExternalProject_Add(
   brpc
-             -DWITH_RDMA=${WITH_BRPC_RDMA}
+  PREFIX brpc
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/brpc
   BINARY_DIR ${BRPC_BINARY_DIR}
   CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
              -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
              -DWITH_GLOG=ON
              -DWITH_SNAPPY=ON
-             -DWITH_RDMA=${WITH_RDMA}
+             -DWITH_RDMA=${WITH_BRPC_RDMA}
              -DDOWNLOAD_GTEST=OFF
              -DBUILD_BRPC_TOOLS=OFF
              -DWITH_DEBUG_SYMBOLS=OFF
@@ -409,13 +430,7 @@ ExternalProject_Add(
           ${DYNAMIC_ANNOTATIONS_HEADER_PATH}
   COMMAND sed -i "s|ANNOTATE_IGNORE_READS_AND_WRITES_END|BUTIL_ANNOTATE_IGNORE_READS_AND_WRITES_END|g"
           ${DYNAMIC_ANNOTATIONS_HEADER_PATH}
-  DEPENDS zlib
-          snappy
-          protobuf
-          leveldb
-          gflags
-          glog
-          openssl${BRPC_DEPENDS_RDMA})
+  DEPENDS ${BRPC_DEPENDS})
 
 # used by fs
 set(BRAFT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/braft/build)
@@ -827,6 +842,145 @@ endif()
 option(WITH_FOLLY "Build folly library" ON)
 
 if(WITH_FOLLY)
+  find_path(
+    DINGO_SYSTEM_JEMALLOC_INCLUDE_DIR
+    NAMES jemalloc/jemalloc.h
+    HINTS ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+  set(FOLLY_JEMALLOC_CMAKE_ARGS)
+  set(FOLLY_JEMALLOC_DEPENDS)
+  if(DINGO_SYSTEM_JEMALLOC_INCLUDE_DIR)
+    ExternalProject_Add(
+      jemalloc_header
+      PREFIX jemalloc_header
+      DOWNLOAD_COMMAND ""
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND ""
+      INSTALL_COMMAND
+        ${CMAKE_COMMAND} -E make_directory ${INSTALL_PATH}/include/jemalloc
+        COMMAND
+          ${CMAKE_COMMAND} -E copy_if_different
+          ${DINGO_SYSTEM_JEMALLOC_INCLUDE_DIR}/jemalloc/jemalloc.h
+          ${INSTALL_PATH}/include/jemalloc/jemalloc.h)
+    list(
+      APPEND
+      FOLLY_JEMALLOC_CMAKE_ARGS
+      -DCMAKE_REQUIRED_INCLUDES:PATH=${INSTALL_PATH}/include)
+    list(APPEND FOLLY_JEMALLOC_DEPENDS jemalloc_header)
+  endif()
+
+  find_path(
+    DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR
+    NAMES libiberty.h
+    HINTS ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
+    PATH_SUFFIXES libiberty)
+  set(DINGO_SYSTEM_DEMANGLE_HEADER)
+  set(DINGO_SYSTEM_ANSIDECL_HEADER)
+  if(DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR)
+    if(EXISTS ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR}/demangle.h)
+      set(
+        DINGO_SYSTEM_DEMANGLE_HEADER
+        ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR}/demangle.h)
+    endif()
+    if(EXISTS ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR}/ansidecl.h)
+      set(
+        DINGO_SYSTEM_ANSIDECL_HEADER
+        ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR}/ansidecl.h)
+    endif()
+
+    get_filename_component(
+      DINGO_SYSTEM_LIBIBERTY_INCLUDE_ROOT
+      ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR}
+      DIRECTORY)
+    get_filename_component(
+      DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR_NAME
+      ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR}
+      NAME)
+    if(NOT DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR_NAME STREQUAL "libiberty")
+      set(
+        DINGO_SYSTEM_LIBIBERTY_INCLUDE_ROOT
+        ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR})
+    endif()
+    get_filename_component(
+      DINGO_SYSTEM_LIBIBERTY_PREFIX
+      ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_ROOT}
+      DIRECTORY)
+    find_file(
+      DINGO_SYSTEM_LIBIBERTY_LIBRARY
+      NAMES libiberty.a
+      HINTS
+        ${DINGO_SYSTEM_LIBIBERTY_PREFIX}/lib64
+        ${DINGO_SYSTEM_LIBIBERTY_PREFIX}/lib
+      PATH_SUFFIXES ${CMAKE_LIBRARY_ARCHITECTURE}
+      NO_DEFAULT_PATH)
+  endif()
+
+  set(FOLLY_LIBIBERTY_CMAKE_ARGS)
+  set(FOLLY_LIBIBERTY_DEPENDS)
+  if(DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR
+     AND DINGO_SYSTEM_DEMANGLE_HEADER
+     AND DINGO_SYSTEM_ANSIDECL_HEADER
+     AND DINGO_SYSTEM_LIBIBERTY_LIBRARY)
+    ExternalProject_Add(
+      libiberty
+      PREFIX libiberty
+      DOWNLOAD_COMMAND ""
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND ""
+      INSTALL_COMMAND
+        ${CMAKE_COMMAND} -E make_directory ${INSTALL_PATH}/include ${INSTALL_PATH}/lib
+        COMMAND
+          ${CMAKE_COMMAND} -E copy_if_different
+          ${DINGO_SYSTEM_LIBIBERTY_INCLUDE_DIR}/libiberty.h
+          ${INSTALL_PATH}/include/libiberty.h
+        COMMAND
+          ${CMAKE_COMMAND} -E copy_if_different
+          ${DINGO_SYSTEM_DEMANGLE_HEADER}
+          ${INSTALL_PATH}/include/demangle.h
+        COMMAND
+          ${CMAKE_COMMAND} -E copy_if_different
+          ${DINGO_SYSTEM_ANSIDECL_HEADER}
+          ${INSTALL_PATH}/include/ansidecl.h
+        COMMAND
+          ${CMAKE_COMMAND} -E copy_if_different
+          ${DINGO_SYSTEM_LIBIBERTY_LIBRARY}
+          ${INSTALL_PATH}/lib/libiberty.a)
+    list(
+      APPEND
+      FOLLY_LIBIBERTY_CMAKE_ARGS
+      -DLIBIBERTY_INCLUDE_DIR:PATH=${INSTALL_PATH}/include
+      -DLIBIBERTY_LIBRARY:FILEPATH=${INSTALL_PATH}/lib/libiberty.a)
+    list(APPEND FOLLY_LIBIBERTY_DEPENDS libiberty)
+  else()
+    include(CheckCXXSourceCompiles)
+    check_cxx_source_compiles(
+      "
+      #if defined(__has_include)
+      #  if !__has_include(<demangle.h>)
+      #    error demangle.h is not visible
+      #  endif
+      #else
+      #  error __has_include is unavailable
+      #endif
+      int main() { return 0; }
+      "
+      DINGO_COMPILER_HAS_DEMANGLE_H)
+    if(DINGO_COMPILER_HAS_DEMANGLE_H)
+      message(
+        FATAL_ERROR
+          "The compiler can include demangle.h, but matching libiberty headers and static library were not found")
+    endif()
+  endif()
+
+  ExternalProject_Add(
+    fast_float
+    PREFIX fast_float
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fast_float
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+               -DFASTFLOAT_TEST=OFF
+               -DFASTFLOAT_BENCHMARKS=OFF
+               -DFASTFLOAT_INSTALL=ON
+    CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH})
+
   ExternalProject_Add(
     folly
     PREFIX folly
@@ -840,15 +994,20 @@ if(WITH_FOLLY)
                -DBUILD_BENCHMARKS=OFF
                -DBoost_USE_STATIC_LIBS=ON
                -DBOOST_LINK_STATIC=ON
-               -DFASTFLOAT_INCLUDE_DIR:PATH=${CMAKE_CURRENT_SOURCE_DIR}/fast_float/include
+               -DFASTFLOAT_INCLUDE_DIR:PATH=${INSTALL_PATH}/include
+               ${FOLLY_JEMALLOC_CMAKE_ARGS}
+               ${FOLLY_LIBIBERTY_CMAKE_ARGS}
     CMAKE_CACHE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
                      -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
                      -DLIB_INSTALL_DIR:STRING=lib
                      -DINCLUDE_INSTALL_DIR:STRING=include
     DEPENDS boost
+            fast_float
             gflags
             glog
             libevent
+            ${FOLLY_JEMALLOC_DEPENDS}
+            ${FOLLY_LIBIBERTY_DEPENDS}
             double-conversion
             openssl
             snappy
@@ -857,29 +1016,6 @@ if(WITH_FOLLY)
             zlib)
 endif()
 
-set(RDMACORE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rdma-core)
-set(RDMACORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/rdma-core/build)
-
-if(WITH_RDMACORE)
-  ExternalProject_Add(
-    rdma-core
-    PREFIX rdma-core
-    SOURCE_DIR ${RDMACORE_SOURCES_DIR}
-    BINARY_DIR ${RDMACORE_BINARY_DIR}
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -GNinja -S <SOURCE_DIR> -B <BINARY_DIR> -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                      -DENABLE_STATIC=ON -DENABLE_VALGRIND=OFF -DENABLE_RESOLVE_NEIGH=OFF -DNO_MAN_PAGES=ON -DNO_PYVERBS=1
-                      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-    BUILD_COMMAND ninja -C <BINARY_DIR> -v -j ${NINJA_JOBS}
-    # copy library to install path
-    COMMAND cp -RL <BINARY_DIR>/include/infiniband ${INSTALL_PATH}/include/
-    COMMAND cp -RL <BINARY_DIR>/include/rdma ${INSTALL_PATH}/include/
-    COMMAND cp <BINARY_DIR>/lib/librdmacm.a ${INSTALL_PATH}/lib/
-    COMMAND cp <BINARY_DIR>/lib/libibverbs.a ${INSTALL_PATH}/lib/
-    COMMAND cp <BINARY_DIR>/lib/pkgconfig/libibverbs.pc ${INSTALL_PATH}/lib/pkgconfig
-    COMMAND cp <BINARY_DIR>/lib/pkgconfig/librdmacm.pc ${INSTALL_PATH}/lib/pkgconfig
-    INSTALL_COMMAND ""
-    BUILD_ALWAYS FALSE)
-endif()
 
 # used by fs ceph librados
 option(WITH_LIBRADOS "Build ceph rados library" ON)
