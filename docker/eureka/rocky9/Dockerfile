@@ -3,6 +3,10 @@
 FROM dingodatabase/dingo-base:rocky9 AS builder
 # FROM harbor.zetyun.cn/dingodb/dingo-base:rocky9-test AS builder
 
+# Expose the gcc-toolset-13 sysroot so CMake finds its headers/libs
+# (demangle.h, libiberty.a) instead of only the compiler seeing them.
+ENV CMAKE_PREFIX_PATH=/opt/rh/gcc-toolset-13/root/usr
+
 # Create a working directory
 WORKDIR /dingo-eureka
 

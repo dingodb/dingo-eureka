@@ -356,18 +356,34 @@ ExternalProject_Add(
                    -DCMAKE_INSTALL_LIBDIR:PATH=${INSTALL_PATH}/lib)
 
 # used by sdk/fs If minimal .a is need, you can set  WITH_DEBUG_SYMBOLS=OFF
+# used by fs; must be declared before the brpc project so its WITH_RDMA flag
+# (which needs the rdma-core-built ibverbs) can follow this option.
+option(WITH_RDMACORE "Build rdma-core library" ON)
+option(WITH_BRPC_RDMA "Build brpc with RDMA (enables WITH_RDMACORE)" ON)
+if(WITH_BRPC_RDMA AND NOT WITH_RDMACORE)
+  message(STATUS "WITH_BRPC_RDMA=ON requires rdma-core: enabling WITH_RDMACORE")
+  set(WITH_RDMACORE ON CACHE BOOL "Build rdma-core library" FORCE)
+endif()
+# brpc RDMA configure needs the ibverbs installed by the rdma-core project;
+# declare the build order explicitly so parallel make cannot race it.
+set(BRPC_DEPENDS_RDMA "")
+if(WITH_BRPC_RDMA)
+  set(BRPC_DEPENDS_RDMA " rdma-core")
+endif()
+
+
 set(BRPC_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/brpc/build)
 set(DYNAMIC_ANNOTATIONS_HEADER_PATH ${INSTALL_PATH}/include/butil/third_party/dynamic_annotations/dynamic_annotations.h)
 ExternalProject_Add(
   brpc
-  PREFIX brpc
+             -DWITH_RDMA=${WITH_BRPC_RDMA}
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/brpc
   BINARY_DIR ${BRPC_BINARY_DIR}
   CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
              -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
              -DWITH_GLOG=ON
              -DWITH_SNAPPY=ON
-             -DWITH_RDMA=ON
+             -DWITH_RDMA=${WITH_RDMA}
              -DDOWNLOAD_GTEST=OFF
              -DBUILD_BRPC_TOOLS=OFF
              -DWITH_DEBUG_SYMBOLS=OFF
@@ -399,7 +415,7 @@ ExternalProject_Add(
           leveldb
           gflags
           glog
-          openssl)
+          openssl${BRPC_DEPENDS_RDMA})
 
 # used by fs
 set(BRAFT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/braft/build)
@@ -840,9 +856,6 @@ if(WITH_FOLLY)
             zstd
             zlib)
 endif()
-
-# used by fs
-option(WITH_RDMACORE "Build rdma-core library" ON)
 
 set(RDMACORE_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rdma-core)
 set(RDMACORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/rdma-core/build)
