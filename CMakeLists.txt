@@ -486,8 +486,8 @@ ExternalProject_Add(
   SOURCE_DIR ${LIBURING_SOURCES_DIR}
   BUILD_IN_SOURCE 1
   CONFIGURE_COMMAND sh ${LIBURING_SOURCES_DIR}/configure --prefix=${INSTALL_PATH}
-  BUILD_COMMAND $(MAKE)
-  INSTALL_COMMAND $(MAKE) install)
+  BUILD_COMMAND $(MAKE) ENABLE_SHARED=0
+  INSTALL_COMMAND $(MAKE) ENABLE_SHARED=0 install)
 
 # used by fs and db
 ExternalProject_Add(
@@ -1013,7 +1013,8 @@ if(WITH_FOLLY)
             snappy
             lz4
             zstd
-            zlib)
+            zlib
+            liburing)
 endif()
 
 
